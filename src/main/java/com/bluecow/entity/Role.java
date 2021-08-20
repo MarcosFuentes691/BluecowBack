@@ -2,7 +2,7 @@ package com.bluecow.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.istack.NotNull;
-import com.bluecow.enums.roleName;
+import com.bluecow.consts.roleName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +24,7 @@ public class Role {
     private roleName roleName;
 
 
-    public Role(com.bluecow.enums.roleName roleUser) {
+    public Role(com.bluecow.consts.roleName roleUser) {
         this.roleName=roleUser;
     }
 }

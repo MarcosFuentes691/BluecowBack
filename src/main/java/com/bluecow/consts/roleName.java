@@ -1,4 +1,4 @@
-package com.bluecow.enums;
+package com.bluecow.consts;
 
 public enum roleName {
     ROLE_USER

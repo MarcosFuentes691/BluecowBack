@@ -1,7 +1,7 @@
 package com.bluecow.service;
 
 import com.bluecow.entity.Role;
-import com.bluecow.enums.roleName;
+import com.bluecow.consts.roleName;
 import com.bluecow.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

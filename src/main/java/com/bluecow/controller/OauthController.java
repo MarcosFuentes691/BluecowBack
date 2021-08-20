@@ -3,7 +3,7 @@ package com.bluecow.controller;
 import com.bluecow.dto.TokenDto;
 import com.bluecow.entity.Player;
 import com.bluecow.entity.Role;
-import com.bluecow.enums.roleName;
+import com.bluecow.consts.roleName;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.PlayerService;
 import com.bluecow.service.RoleService;

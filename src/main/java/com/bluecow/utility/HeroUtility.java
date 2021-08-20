@@ -1,4 +1,6 @@
-package com.bluecow;
+package com.bluecow.utility;
+
+import com.bluecow.consts.ConstHeroes;
 
 import java.util.ArrayList;
 

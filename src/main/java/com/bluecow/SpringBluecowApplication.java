@@ -1,15 +1,7 @@
 package com.bluecow;
 
-import com.bluecow.entity.Game;
-import com.bluecow.entity.Role;
-import com.bluecow.service.GameService;
-import com.bluecow.service.RoleService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import static com.bluecow.enums.roleName.ROLE_USER;
 
 @SpringBootApplication
 public class SpringBluecowApplication {

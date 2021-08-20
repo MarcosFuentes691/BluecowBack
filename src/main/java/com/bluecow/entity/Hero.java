@@ -6,32 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
 
-@Entity
-@Data
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @NoArgsConstructor
 @AllArgsConstructor
-public class Game {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @NotNull
-    private String player;
-    @NotNull
-    private Integer place;
-    @NotNull
+@Data
+public class Hero {
+    private Float avgPlace;
     private Integer mmr;
-    @NotNull
-    private Timestamp timestamp;
-    @NotNull
-    private String hero;
-    @Transient
+    private Timestamp lastUse;
+    private String name;
     private String heroUrl;
 
+    public Hero(String name) {
+        this.name = name;
+    }
 }

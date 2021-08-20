@@ -1,7 +1,7 @@
 package com.bluecow.repository;
 
 import com.bluecow.entity.Role;
-import com.bluecow.enums.roleName;
+import com.bluecow.consts.roleName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
