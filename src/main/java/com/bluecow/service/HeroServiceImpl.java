@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +26,7 @@ public class HeroServiceImpl implements HeroService{
 
     private final GameRepository gameRepository;
 
-    HeroUtility heroUtility;
+    HeroUtility heroUtility = new HeroUtility();
     ConstHeroes constHeroes;
 
     @Override
@@ -36,8 +39,8 @@ public class HeroServiceImpl implements HeroService{
     @Override
     public ArrayList<Hero> viewHeroes(String playerEmail) throws Exception {
         ArrayList<Hero> heroes = new ArrayList<>();
-        for (int i=0;i<heroList.size();i++) {
-            heroes.add(makeHero(playerEmail,heroList.get(i)));
+        for (String s : heroList) {
+            heroes.add(makeHero(playerEmail, s));
         }
         return heroes;
     }
@@ -55,15 +58,25 @@ public class HeroServiceImpl implements HeroService{
         Hero hero = new Hero();
         float avgPos = 0;
         int mmr = 0;
-        for(int i=0;i<games.size();i++) {
-            avgPos += games.get(i).getPlace();
-            mmr += games.get(i).getMmr() - gameRepository.findByPlayerAndIdBefore(playerEmail, games.get(i).getId()).getMmr();
-            if (games.get(i).getTimestamp().after(hero.getLastUse()))
-                hero.setLastUse(games.get(i).getTimestamp());
+        hero.setLastUse(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
+        for (Game actualGame : games) {
+            Game previousGame = gameRepository.getFirstByIdIsLessThanAndPlayerOrderByIdDesc(actualGame.getId(), playerEmail);
+            avgPos += actualGame.getPlace();
+            if (previousGame == null) {
+                mmr += actualGame.getMmr();
+            } else {
+                mmr += actualGame.getMmr() - previousGame.getMmr();
+            }
+            if (actualGame.getTimestamp().after(hero.getLastUse()))
+                hero.setLastUse(actualGame.getTimestamp());
         }
-        hero.setHeroUrl(stringHero);//heroUtility.);
+        hero.setMmr(mmr);
+        hero.setAvgPlace(avgPos/games.size());
+        hero.setHeroUrl(stringHero);
         hero.setName(stringHero);
+        hero.setGamesPlayed(games.size());
         return hero;
     }
-
 }
+
+

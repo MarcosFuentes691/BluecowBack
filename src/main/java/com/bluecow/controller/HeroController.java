@@ -2,12 +2,11 @@ package com.bluecow.controller;
 
 import com.bluecow.entity.Game;
 import com.bluecow.entity.Hero;
+import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
-import com.bluecow.service.GameService;
 import com.bluecow.service.HeroService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,22 +19,42 @@ import java.util.List;
 public class HeroController {
 
     private final HeroService heroService;
+    private final GameRepository gameRepository;
 
     @Autowired
     JwtProvider jwtProvider;
 
-    public HeroController(HeroService heroService) {
+    public HeroController(HeroService heroService, GameRepository gameRepository) {
         this.heroService = heroService;
+        this.gameRepository = gameRepository;
     }
 
-    @GetMapping("/view")
-    public ResponseEntity<Hero> viewGames(@RequestHeader("Authorization") String authReq,
-                                          @RequestParam("hero") String hero) throws Exception {
+    @GetMapping("/detail/{hero}")
+    public ResponseEntity<Object> detailedHero(@RequestHeader("Authorization") String authReq,
+                                          @PathVariable("hero") String heroString) {
+        String email="Holi";
         if (authReq != null && authReq.startsWith("Bearer ")) {
             authReq = authReq.replace("Bearer ", "");
-            authReq = jwtProvider.getEmailFromToken(authReq);
-            log.info("authreq=", authReq);
+            email = jwtProvider.getEmailFromToken(authReq);
+            log.info("email=" + email);
         }
-        return new ResponseEntity<Hero>(heroService.viewHero(authReq, hero), HttpStatus.OK);
+        Hero hero;
+        try {
+            hero=heroService.viewHero(email, heroString);
+        }
+        catch(Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+        return ResponseEntity.status(200).body(hero);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Game>> viewHeroes(@RequestHeader("Authorization") String authReq){
+        return null;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Game>> searchHeroes(@RequestHeader("Authorization") String authReq){
+        return null;
     }
 }

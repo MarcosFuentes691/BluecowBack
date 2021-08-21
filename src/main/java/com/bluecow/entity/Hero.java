@@ -22,7 +22,7 @@ public class Hero {
     private Timestamp lastUse;
     private String name;
     private String heroUrl;
-
+    private Integer gamesPlayed;
     public Hero(String name) {
         this.name = name;
     }
