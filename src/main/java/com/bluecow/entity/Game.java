@@ -19,7 +19,13 @@ import java.util.Set;
 public class Game {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name="gameid_sequence",
+            sequenceName = "gameid_sequence",
+            initialValue=195,
+            allocationSize=1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="gameid_sequence")
+    //@GeneratedValue(strategy = GenerationType.TABLE)//GenerationType.IDENTITY)
     private Long id;
     @NotNull
     private String player;

@@ -1,9 +1,13 @@
 package com.bluecow.utility;
 
 import com.bluecow.consts.ConstHeroes;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
+@Slf4j
+@Component
 public class HeroUtility {
 
     ArrayList<String> heroes = ConstHeroes.heroList;
