@@ -25,7 +25,9 @@ public class GameServiceImpl implements GameService{
 
     @Autowired
     HeroUtility heroUtility;
+
     private final GameRepository gameRepository;
+    private final HeroService heroService;
 
     @Override
     public Game saveGame(Game game) throws Exception {
@@ -35,6 +37,7 @@ public class GameServiceImpl implements GameService{
             throw new Exception("Timestamp from the future");
         if(!(heroUtility.heroExists(game.getHero())))
             throw new Exception("Hero not correct");
+        heroService.updateHero(game,true);
         return gameRepository.save(game);
     }
 
@@ -44,6 +47,7 @@ public class GameServiceImpl implements GameService{
             throw new Exception("Game not found");
         if(!(player.equals(gameRepository.findById(id).get().getPlayer())))
             throw new Exception("Not allowed");
+        heroService.updateHero(gameRepository.findById(id).get(),false);
         gameRepository.delete(gameRepository.findById(id).get());
         return true;
     }

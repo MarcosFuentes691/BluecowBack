@@ -4,6 +4,7 @@ import com.bluecow.consts.ConstHeroes;
 import com.bluecow.entity.Game;
 import com.bluecow.entity.Hero;
 import com.bluecow.repository.GameRepository;
+import com.bluecow.repository.HeroRepository;
 import com.bluecow.utility.HeroUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bluecow.consts.ConstHeroes.heroList;
+import static com.bluecow.consts.ConstHeroes.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,24 +26,22 @@ import static com.bluecow.consts.ConstHeroes.heroList;
 public class HeroServiceImpl implements HeroService{
 
     private final GameRepository gameRepository;
+    private final HeroRepository heroRepository;
 
     HeroUtility heroUtility = new HeroUtility();
-    ConstHeroes constHeroes;
 
     @Override
     public Hero viewHero(String playerEmail, String stringHero) throws Exception {
         if(!(heroUtility.heroExists(stringHero)))
             throw new Exception("hero doesnt exists");
-        return makeHero(playerEmail,stringHero);
+        if(heroRepository.findByPlayerAndName(playerEmail,stringHero)==null)
+            throw new Exception("hero not found");
+        return heroRepository.findByPlayerAndName(playerEmail, stringHero);
     }
 
     @Override
-    public ArrayList<Hero> viewHeroes(String playerEmail) throws Exception {
-        ArrayList<Hero> heroes = new ArrayList<>();
-        for (String s : heroList) {
-            heroes.add(makeHero(playerEmail, s));
-        }
-        return heroes;
+    public List<Hero> viewHeroes(String playerEmail) throws Exception {
+        return heroRepository.findAllByPlayer(playerEmail);
     }
 
 
@@ -53,7 +52,31 @@ public class HeroServiceImpl implements HeroService{
         return null;
     }
 
-    private Hero makeHero(String playerEmail, String stringHero){
+    @Override
+    public void updateHero(Game game,boolean operation) throws Exception {
+        if(!(heroUtility.heroExists(game.getHero())))   ////This two exceptions shouldnt pop theoretically??
+            throw new Exception("hero doesnt exists");
+        if(heroRepository.findByPlayerAndName(game.getPlayer(), game.getHero())==null)
+            throw new Exception("hero not found");
+        Hero hero = heroRepository.findByPlayerAndName(game.getPlayer(), game.getHero());
+        if(operation){
+            hero.setMmr(hero.getMmr()+game.getMmr());
+            hero.setAvgPlace((hero.getAvgPlace()*hero.getGamesPlayed()+ game.getPlace())/(hero.getGamesPlayed()+1));
+            hero.setGamesPlayed(hero.getGamesPlayed()+1);
+            hero.setLastUse(game.getTimestamp()); //SHOULD COMPARE
+
+        }
+        else{
+            hero.setMmr(hero.getMmr()-game.getMmr());
+            hero.setAvgPlace((hero.getAvgPlace()*hero.getGamesPlayed()- game.getPlace())/(hero.getGamesPlayed()-1));
+            hero.setGamesPlayed(hero.getGamesPlayed()-1);
+            hero.setLastUse(game.getTimestamp()); //SEARCH LASTONE
+        }
+
+        heroRepository.save(hero);
+    }
+
+    private void makeHero(String playerEmail, String stringHero){
         List<Game> games = gameRepository.findAllByPlayerAndHero(playerEmail,stringHero);
         Hero hero = new Hero();
         float avgPos = 0;
@@ -74,8 +97,9 @@ public class HeroServiceImpl implements HeroService{
         hero.setAvgPlace(avgPos/games.size());
         hero.setHeroUrl(stringHero);
         hero.setName(stringHero);
+        hero.setPlayer(playerEmail);
         hero.setGamesPlayed(games.size());
-        return hero;
+        heroRepository.save(hero);
     }
 }
 

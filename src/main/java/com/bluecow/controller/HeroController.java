@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,8 +50,21 @@ public class HeroController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Game>> viewHeroes(@RequestHeader("Authorization") String authReq){
-        return null;
+    public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq){
+        String email="Holi";
+        if (authReq != null && authReq.startsWith("Bearer ")) {
+            authReq = authReq.replace("Bearer ", "");
+            email = jwtProvider.getEmailFromToken(authReq);
+            log.info("email=" + email);
+        }
+        List<Hero> heroes=null;
+        try {
+            heroes=heroService.viewHeroes(email);
+        }
+        catch(Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+        return ResponseEntity.status(200).body(heroes);
     }
 
     @GetMapping("/search")

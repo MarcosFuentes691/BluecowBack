@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class GameController {
         authReq=bearerCleaner.cleanBearer(authReq);
         game.setPlayer(authReq);
         try {
+            game.setTimestamp(Timestamp.from(Instant.now()));//TEMPORARY
             game=gameService.saveGame(game);
         }catch (Exception e){
             log.warn(e.getMessage());

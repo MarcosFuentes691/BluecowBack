@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 @Component
 public class JwtProvider {
@@ -25,6 +29,7 @@ public class JwtProvider {
         UserAuth userAuth = (UserAuth) authentication.getPrincipal();
         return Jwts.builder().setSubject(userAuth.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
+                //.setExpiration(java.util.Date.from(LocalDate.of(2022,1,1).atStartOfDay().toInstant(ZoneOffset.UTC)))//(System.currentTimeMillis() + expiration))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();

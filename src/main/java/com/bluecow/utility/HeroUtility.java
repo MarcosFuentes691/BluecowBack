@@ -23,4 +23,8 @@ public class HeroUtility {
         return present;
     }
 
+    public int heroesAmount(){
+        return heroes.size();
+    }
+
 }
