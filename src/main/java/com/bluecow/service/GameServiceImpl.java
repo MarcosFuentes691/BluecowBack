@@ -71,6 +71,8 @@ public class GameServiceImpl implements GameService{
 
     @Override
     public List<Game> searchGames(String playerEmail, String hero, String from, String to) throws Exception {
+        if(!(heroUtility.heroExists(hero)))
+            throw new Exception("hero doesnt exists");
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
@@ -83,8 +85,8 @@ public class GameServiceImpl implements GameService{
         if(to==null)
             calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
         if(hero==null)
-            return gameRepository.findAllByTimestampAfterAndTimestampBefore(calFrom,calTo);
+            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo);
         else
-            return gameRepository.findAllByTimestampAfterAndTimestampBeforeAndHero(calFrom,calTo,hero);
+            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,calFrom,calTo,hero);
     }
 }
