@@ -147,14 +147,19 @@ public class HeroServiceImpl implements HeroService{
         }
         List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo);
         int heroPos = 0;
-        for (Game actualGame : games) {
-            for(int i=0;i<heroes.size();i++) {
-                if(heroes.get(i).getName().equals(actualGame.getHero())) {
-                    heroPos=i;
+        for (int i=0;i< games.size();i++) {
+            Game actualGame = games.get(i);
+            Game previousGame;
+            for(int j=0;j<heroes.size();j++) {
+                if(heroes.get(j).getName().equals(actualGame.getHero())) {
+                    heroPos=j;
                     break;
                 }
             }
-            Game previousGame = gameRepository.getFirstByIdIsLessThanAndPlayerOrderByIdDesc(actualGame.getId(), playerEmail);
+            if(i>0)
+                previousGame = games.get(i-1);
+            else
+                previousGame = null;
             int mmr = 0;
             if (previousGame == null) {
                 mmr += actualGame.getMmr();
