@@ -4,8 +4,11 @@ import com.bluecow.entity.Game;
 import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.HeroService;
+import com.bluecow.service.PlayerService;
+import com.bluecow.utility.BearerCleaner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,19 +20,22 @@ import java.util.List;
 @Slf4j
 public class PlayerController {
 
-    private final HeroService heroService;
-    private final GameRepository gameRepository;
+    private final PlayerService playerService;
 
     @Autowired
-    JwtProvider jwtProvider;
+    BearerCleaner bearerCleaner;
 
-    public PlayerController(HeroService heroService, GameRepository gameRepository) {
-        this.heroService = heroService;
-        this.gameRepository = gameRepository;
+    public PlayerController(PlayerService playerService) {
+        this.playerService = playerService;
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<List<Game>> viewHeroes(@RequestHeader("Authorization") String authReq){
-        return null;
+    public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq){
+        authReq=bearerCleaner.cleanBearer(authReq);
+        try {
+            return new ResponseEntity<>(playerService.getPlayerStats(authReq),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }
