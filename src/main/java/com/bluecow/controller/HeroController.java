@@ -51,9 +51,9 @@ public class HeroController {
     public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq){
         String email="Holi";
         authReq=bearerCleaner.cleanBearer(authReq);
-        List<Hero> heroes=null;
+        List<Hero> heroes;
         try {
-            heroes=heroService.viewHeroes(email);
+            heroes=heroService.viewHeroes(authReq);
         }
         catch(Exception e) {
             return ResponseEntity.status(400).body(e.getMessage());
