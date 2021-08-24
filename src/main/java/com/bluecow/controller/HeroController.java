@@ -5,12 +5,13 @@ import com.bluecow.entity.Hero;
 import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.HeroService;
+import com.bluecow.utility.BearerCleaner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,6 +25,8 @@ public class HeroController {
 
     @Autowired
     JwtProvider jwtProvider;
+    @Autowired
+    BearerCleaner bearerCleaner;
 
     public HeroController(HeroService heroService, GameRepository gameRepository) {
         this.heroService = heroService;
@@ -33,15 +36,10 @@ public class HeroController {
     @GetMapping("/detail/{hero}")
     public ResponseEntity<Object> detailedHero(@RequestHeader("Authorization") String authReq,
                                           @PathVariable("hero") String heroString) {
-        String email="Holi";
-        if (authReq != null && authReq.startsWith("Bearer ")) {
-            authReq = authReq.replace("Bearer ", "");
-            email = jwtProvider.getEmailFromToken(authReq);
-            log.info("email=" + email);
-        }
+        authReq=bearerCleaner.cleanBearer(authReq);
         Hero hero;
         try {
-            hero=heroService.viewHero(email, heroString);
+            hero=heroService.viewHero(authReq, heroString);
         }
         catch(Exception e) {
             return ResponseEntity.status(400).body(e.getMessage());
@@ -52,11 +50,7 @@ public class HeroController {
     @GetMapping("/all")
     public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq){
         String email="Holi";
-        if (authReq != null && authReq.startsWith("Bearer ")) {
-            authReq = authReq.replace("Bearer ", "");
-            email = jwtProvider.getEmailFromToken(authReq);
-            log.info("email=" + email);
-        }
+        authReq=bearerCleaner.cleanBearer(authReq);
         List<Hero> heroes=null;
         try {
             heroes=heroService.viewHeroes(email);
@@ -68,7 +62,15 @@ public class HeroController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Game>> searchHeroes(@RequestHeader("Authorization") String authReq){
-        return null;
+    public ResponseEntity<?> searchHero(@RequestHeader("Authorization") String authReq,
+                                         @RequestParam(required=false) String hero,
+                                         @RequestParam(required=false) String from,
+                                         @RequestParam(required=false) String to){
+        authReq=bearerCleaner.cleanBearer(authReq);
+        try {
+            return new ResponseEntity<>(heroService.searchHero(authReq, hero, from, to), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 }
