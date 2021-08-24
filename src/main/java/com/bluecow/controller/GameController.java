@@ -11,9 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -41,7 +38,6 @@ public class GameController {
         authReq=bearerCleaner.cleanBearer(authReq);
         game.setPlayer(authReq);
         try {
-            game.setTimestamp(Timestamp.from(Instant.now()));//TEMPORARY
             game=gameService.saveGame(game);
         }catch (Exception e){
             log.warn(e.getMessage());
@@ -72,7 +68,7 @@ public class GameController {
     public ResponseEntity<?> detailedGame(@RequestHeader("Authorization") String authReq,
                                           @PathVariable("id") Long id) {
         authReq=bearerCleaner.cleanBearer(authReq);
-        Game game = null;
+        Game game;
         try {
             game=gameService.detailedGameById(id,authReq);
         }catch (Exception e){
@@ -94,11 +90,11 @@ public class GameController {
                                                   @RequestParam(required=false) String from,
                                                   @RequestParam(required=false) String to){
         authReq=bearerCleaner.cleanBearer(authReq);
-        Timestamp fromTime=Timestamp.valueOf(from);
-        Timestamp toTime=Timestamp.valueOf(to);
-        if(toTime.before(fromTime))
-            return new ResponseEntity<>("Invalid dates",HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(gameService.searchGames(authReq,hero,fromTime,toTime), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(gameService.searchGames(authReq, hero, from, to), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 
 

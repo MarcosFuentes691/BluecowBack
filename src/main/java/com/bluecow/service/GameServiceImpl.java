@@ -1,6 +1,5 @@
 package com.bluecow.service;
 
-import com.bluecow.utility.BearerCleaner;
 import com.bluecow.utility.HeroUtility;
 import com.bluecow.entity.Game;
 import com.bluecow.repository.GameRepository;
@@ -11,11 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +31,12 @@ public class GameServiceImpl implements GameService{
     public Game saveGame(Game game) throws Exception {
         if(game.getPlace()>8 || game.getPlace()<1)
             throw new Exception("Place not correct");
-        if(game.getTimestamp().after(Timestamp.from(Instant.now().plusSeconds(30))))
-            throw new Exception("Timestamp from the future");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(sdf.parse(game.getTimestampString()));
+        game.setTimestamp(cal);
+        if(game.getTimestamp().after(Calendar.getInstance().getTime()))
+            throw new Exception("Timestamp from the future"); //Why this doesnt work????
         if(!(heroUtility.heroExists(game.getHero())))
             throw new Exception("Hero not correct");
         heroService.updateHero(game,true);
@@ -63,18 +65,26 @@ public class GameServiceImpl implements GameService{
 
     @Override
     public List<Game> viewGames(String playerEmail) {
-        return gameRepository.findAllByPlayer(playerEmail);
+        return gameRepository.findAllByPlayerOrderByIdDesc(playerEmail);
     }
 
+
     @Override
-    public List<Game> searchGames(String playerEmail, String hero, Timestamp from, Timestamp to) {
+    public List<Game> searchGames(String playerEmail, String hero, String from, String to) throws Exception {
+        Calendar calFrom = Calendar.getInstance();
+        Calendar calTo = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        calFrom.setTime(sdf.parse(from));
+        calTo.setTime(sdf.parse(to));
+        if (calTo.getTime().before(calFrom.getTime()))
+                throw new Exception("Invalid dates");
         if(from==null)
-            from=Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1));
+            calFrom.setTime(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
         if(to==null)
-            to=Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1));
+            calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
         if(hero==null)
-            return gameRepository.findAllByTimestampAfterAndTimestampBefore(from,to);
+            return gameRepository.findAllByTimestampAfterAndTimestampBefore(calFrom,calTo);
         else
-            return gameRepository.findAllByTimestampAfterAndTimestampBeforeAndHero(from,to,hero);
+            return gameRepository.findAllByTimestampAfterAndTimestampBeforeAndHero(calFrom,calTo,hero);
     }
 }

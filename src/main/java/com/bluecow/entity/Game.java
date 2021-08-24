@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Calendar;
 
 @Entity
 @Data
@@ -25,7 +23,6 @@ public class Game {
             initialValue=195,
             allocationSize=1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="gameid_sequence")
-    //@GeneratedValue(strategy = GenerationType.TABLE)//GenerationType.IDENTITY)
     private Long id;
     @NotNull
     private String player;
@@ -34,10 +31,12 @@ public class Game {
     @NotNull
     private Integer mmr;
     @NotNull
-    private Timestamp timestamp;
+    private Calendar timestamp;//Timestamp timestamp;
     @NotNull
     private String hero;
     @Transient
     private String heroUrl;
+    @Transient
+    private String timestampString;
 
 }

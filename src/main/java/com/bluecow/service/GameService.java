@@ -2,8 +2,7 @@ package com.bluecow.service;
 
 import com.bluecow.entity.Game;
 
-import java.sql.Timestamp;
-import java.util.Collection;
+import java.text.ParseException;
 import java.util.List;
 
 public interface GameService {
@@ -13,5 +12,5 @@ public interface GameService {
     //boolean detailedGame(Game game) throws Exception;
     Game detailedGameById(Long id,String player) throws Exception;
     List<Game> viewGames(String playerEmail);
-    List<Game> searchGames(String playerEmail, String hero, Timestamp from, Timestamp to);
+    List<Game> searchGames(String playerEmail, String hero, String from, String to) throws Exception;
 }
