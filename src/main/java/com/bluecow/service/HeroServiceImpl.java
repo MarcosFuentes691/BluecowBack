@@ -1,6 +1,5 @@
 package com.bluecow.service;
 
-import com.bluecow.consts.ConstHeroes;
 import com.bluecow.entity.Game;
 import com.bluecow.entity.Hero;
 import com.bluecow.repository.GameRepository;
@@ -11,13 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.bluecow.consts.ConstHeroes.*;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +75,7 @@ public class HeroServiceImpl implements HeroService{
         Hero hero = new Hero();
         float avgPos = 0;
         int mmr = 0;
-        hero.setLastUse(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
+        hero.setLastUse(null);//(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
         for (Game actualGame : games) {
             Game previousGame = gameRepository.getFirstByIdIsLessThanAndPlayerOrderByIdDesc(actualGame.getId(), playerEmail);
             avgPos += actualGame.getPlace();

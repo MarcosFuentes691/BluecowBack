@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,10 +31,10 @@ public class Player {
     inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles = new HashSet<>();
     private String name;
-    private Timestamp creationDate;
+    private Calendar creationDate;
 
 
-    public Player(String email, String password, String name, Timestamp timestamp) {
+    public Player(String email, String password, String name, Calendar timestamp) {
         this.email = email;
         this.password = password;
         this.name = name;

@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Calendar;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -30,7 +30,7 @@ public class Hero {
     @NotNull
     private Integer mmr;
     @NotNull
-    private Timestamp lastUse;
+    private Calendar lastUse;
     @NotNull
     private String name;
     @NotNull

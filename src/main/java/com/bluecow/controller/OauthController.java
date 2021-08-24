@@ -26,8 +26,7 @@ import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -69,7 +68,7 @@ public class OauthController {
                 .setAudience(Collections.singletonList(googleClientId));
         final GoogleIdToken googleIdToken = GoogleIdToken.parse(verifier.getJsonFactory(), tokenDto.getValue());
         final GoogleIdToken.Payload payload = googleIdToken.getPayload();
-        Player player = new Player();
+        Player player;
         if(playerService.existsEmail(payload.getEmail()))
             player = playerService.getByEmail(payload.getEmail()).get();
         else
@@ -104,7 +103,8 @@ public class OauthController {
     }
 
     private Player savePlayer(String email,String name){
-        Player player = new Player(email, passwordEncoder.encode(secretPsw),name, Timestamp.from(Instant.now()));
+
+        Player player = new Player(email, passwordEncoder.encode(secretPsw),name, Calendar.getInstance());
         Role roleUser = roleService.getByNameRole(roleName.ROLE_USER).get();
         Set<Role> roles = new HashSet<>();
         roles.add(roleUser);
