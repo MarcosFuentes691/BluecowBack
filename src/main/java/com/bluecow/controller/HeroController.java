@@ -21,16 +21,14 @@ import java.util.List;
 public class HeroController {
 
     private final HeroService heroService;
-    private final GameRepository gameRepository;
 
     @Autowired
     JwtProvider jwtProvider;
     @Autowired
     BearerCleaner bearerCleaner;
 
-    public HeroController(HeroService heroService, GameRepository gameRepository) {
+    public HeroController(HeroService heroService) {
         this.heroService = heroService;
-        this.gameRepository = gameRepository;
     }
 
     @GetMapping("/detail/{hero}")
@@ -48,12 +46,13 @@ public class HeroController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq){
-        String email="Holi";
+    public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq,
+                                        @RequestParam(required=false) String from,
+                                        @RequestParam(required=false) String to){
         authReq=bearerCleaner.cleanBearer(authReq);
         List<Hero> heroes;
         try {
-            heroes=heroService.viewHeroes(authReq);
+            heroes=heroService.viewHeroes(authReq,from,to);
         }
         catch(Exception e) {
             return ResponseEntity.status(400).body(e.getMessage());

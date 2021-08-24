@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -40,5 +42,11 @@ public class Hero {
 
     public Hero(String name) {
         this.name = name;
+        this.avgPlace = (float) 0;
+        this.mmr = 0;
+        this.gamesPlayed =0 ;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Date.from(Instant.EPOCH));
+        this.lastUse = cal;
     }
 }
