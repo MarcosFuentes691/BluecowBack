@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -23,26 +24,10 @@ public class HeroController {
     private final HeroService heroService;
 
     @Autowired
-    JwtProvider jwtProvider;
-    @Autowired
     BearerCleaner bearerCleaner;
 
     public HeroController(HeroService heroService) {
         this.heroService = heroService;
-    }
-
-    @GetMapping("/detail/{hero}")
-    public ResponseEntity<Object> detailedHero(@RequestHeader("Authorization") String authReq,
-                                          @PathVariable("hero") String heroString) {
-        authReq=bearerCleaner.cleanBearer(authReq);
-        Hero hero;
-        try {
-            hero=heroService.viewHero(authReq, heroString);
-        }
-        catch(Exception e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
-        return ResponseEntity.status(200).body(hero);
     }
 
     @GetMapping("/all")
@@ -50,7 +35,7 @@ public class HeroController {
                                         @RequestParam(required=false) String from,
                                         @RequestParam(required=false) String to){
         authReq=bearerCleaner.cleanBearer(authReq);
-        List<Hero> heroes;
+        Collection<Hero> heroes;
         try {
             heroes=heroService.viewHeroes(authReq,from,to);
         }

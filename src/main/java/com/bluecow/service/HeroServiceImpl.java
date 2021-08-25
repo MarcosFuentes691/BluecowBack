@@ -1,6 +1,5 @@
 package com.bluecow.service;
 
-import com.bluecow.consts.ConstHeroes.*;
 import com.bluecow.entity.Game;
 import com.bluecow.entity.Hero;
 import com.bluecow.repository.GameRepository;
@@ -12,16 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import static com.bluecow.consts.ConstHeroes.heroList;
+import java.util.*;
 
 
 @Service
@@ -36,20 +29,8 @@ public class HeroServiceImpl implements HeroService{
     HeroUtility heroUtility = new HeroUtility();
 
     @Override
-    public Hero viewHero(String playerEmail, String stringHero) throws Exception {
-        if(!(heroUtility.heroExists(stringHero)))
-            throw new Exception("hero doesnt exists");
-        ///makehero
-        //if(heroRepository.findByPlayerAndName(playerEmail,stringHero)==null)
-        //    throw new Exception("hero not found");
-        //return heroRepository.findByPlayerAndName(playerEmail, stringHero);
-        return null;//make
-    }
-
-    @Override
-    public List<Hero> viewHeroes(String playerEmail,String from, String to) throws Exception {
-        ///Make heroes on the go
-        return makeHeroes(playerEmail,from,to);//heroRepository.findAllByPlayer(playerEmail);
+    public Collection<Hero> viewHeroes(String playerEmail, String from, String to) throws Exception {
+        return makeHeroes(playerEmail,from,to);
     }
 
 
@@ -74,31 +55,6 @@ public class HeroServiceImpl implements HeroService{
         return makeHero(playerEmail,stringHero,calFrom,calTo);
     }
 
-    @Override
-    public void updateHero(Game game,boolean operation) throws Exception {
-        //make heroes on the go
-    }
-        /*if (!(heroUtility.heroExists(game.getHero())))   ////This two exceptions shouldnt pop theoretically??
-            throw new Exception("hero doesnt exists");
-        if (heroRepository.findByPlayerAndName(game.getPlayer(), game.getHero()) == null) {
-            newHero(game.getPlayer(), game.getHero());
-        } else {
-            Hero hero = heroRepository.findByPlayerAndName(game.getPlayer(), game.getHero());
-            if (operation) {
-                hero.setMmr(hero.getMmr() + game.getMmr());
-                hero.setAvgPlace((hero.getAvgPlace() * hero.getGamesPlayed() + game.getPlace()) / (hero.getGamesPlayed() + 1));
-                hero.setGamesPlayed(hero.getGamesPlayed() + 1);
-                hero.setLastUse(game.getTimestamp()); //SHOULD COMPARE
-            } else {
-                hero.setMmr(hero.getMmr() - game.getMmr());
-                hero.setAvgPlace((hero.getAvgPlace() * hero.getGamesPlayed() - game.getPlace()) / (hero.getGamesPlayed() - 1));
-                hero.setGamesPlayed(hero.getGamesPlayed() - 1);
-                hero.setLastUse(game.getTimestamp()); //SEARCH LASTONE
-            }
-            heroRepository.save(hero);
-        }
-    }
-*/
     private Hero makeHero(String playerEmail, String stringHero, Calendar from, Calendar to){
         List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,from,to,stringHero);
         Hero hero = new Hero();
@@ -127,10 +83,9 @@ public class HeroServiceImpl implements HeroService{
         return hero;
     }
 
-    private ArrayList<Hero> makeHeroes(String playerEmail, String from, String to) throws Exception {
+    private Collection<Hero> makeHeroes(String playerEmail, String from, String to) throws Exception {
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         if(from==null)
             calFrom.setTime(Date.from(Instant.EPOCH));
         else
@@ -141,21 +96,15 @@ public class HeroServiceImpl implements HeroService{
             calTo.setTime(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS").parse(to));
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
-        ArrayList<Hero> heroes = new ArrayList<>();
-        for(String hero : heroList) {
-            heroes.add(new Hero(hero));
-        }
+        Map<String,Hero> heroMap= new HashMap<>();
         List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo);
-        int heroPos = 0;
+        for(Game game : games){
+            heroMap.put(game.getHero(),new Hero(game.getHero()));
+        }
         for (int i=0;i< games.size();i++) {
             Game actualGame = games.get(i);
+            Hero gameHero = heroMap.get(actualGame.getHero());
             Game previousGame;
-            for(int j=0;j<heroes.size();j++) {
-                if(heroes.get(j).getName().equals(actualGame.getHero())) {
-                    heroPos=j;
-                    break;
-                }
-            }
             if(i>0)
                 previousGame = games.get(i-1);
             else
@@ -163,15 +112,17 @@ public class HeroServiceImpl implements HeroService{
             int mmr = 0;
             if (previousGame == null) {
                 mmr += actualGame.getMmr();
+                gameHero.setAvgPlace((float)actualGame.getPlace());
             } else {
                 mmr += actualGame.getMmr() - previousGame.getMmr();
+                gameHero.setAvgPlace((gameHero.getAvgPlace() * gameHero.getGamesPlayed() + actualGame.getPlace()) / (gameHero.getGamesPlayed() + 1));
             }
-            if (actualGame.getTimestamp().after(heroes.get(heroPos).getLastUse()))
-                heroes.get(heroPos).setLastUse(actualGame.getTimestamp());
-            heroes.get(heroPos).setMmr(heroes.get(heroPos).getMmr()+mmr);
-            heroes.get(heroPos).setGamesPlayed(heroes.get(heroPos).getGamesPlayed()+1);
-            heroes.get(heroPos).setAvgPlace((heroes.get(heroPos).getAvgPlace() * heroes.get(heroPos).getGamesPlayed() - actualGame.getPlace()) / (heroes.get(heroPos).getGamesPlayed() + 1));
+            if (actualGame.getTimestamp().after(heroMap.get(actualGame.getHero()).getLastUse()))
+                gameHero.setLastUse(actualGame.getTimestamp());
+            gameHero.setMmr(gameHero.getMmr()+mmr);
+            gameHero.setGamesPlayed(gameHero.getGamesPlayed()+1);
+            heroMap.replace(actualGame.getHero(),gameHero);
         }
-        return heroes;
+        return heroMap.values();
     }
 }
