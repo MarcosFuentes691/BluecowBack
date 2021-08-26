@@ -18,6 +18,9 @@ public class BearerCleaner {
                 authReq = authReq.replace("Bearer ", "");
                 authReq = jwtProvider.getEmailFromToken(authReq);
             }
+            else if (authReq != null) {
+                authReq = jwtProvider.getEmailFromToken(authReq);
+            }
         } catch (Exception e) {
             log.warn("exception on token, controller, bearerclaner");
         }

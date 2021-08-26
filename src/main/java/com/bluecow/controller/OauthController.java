@@ -24,10 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/oauth")
@@ -56,6 +53,16 @@ public class OauthController {
     RoleService roleService;
 
 
+    @PostMapping("/user")
+    public ResponseEntity<TokenDto> user(@RequestParam String username, @RequestParam String password) throws IOException {
+        Player player;
+        if(playerService.existsEmail(username))
+            player = playerService.getByEmail(username).get();
+        else
+            player = savePlayer(username,username,password);
+        TokenDto tokenRes = login(player,password);
+        return new ResponseEntity(tokenRes, HttpStatus.OK);
+    }
 
     @PostMapping("/google")
     public ResponseEntity<TokenDto> google(@RequestBody TokenDto tokenDto) throws IOException {
@@ -70,25 +77,26 @@ public class OauthController {
         if(playerService.existsEmail(payload.getEmail()))
             player = playerService.getByEmail(payload.getEmail()).get();
         else
-            player = savePlayer(payload.getEmail(),(String) payload.get("name"));
-        TokenDto tokenRes = login(player);
+            player = savePlayer(payload.getEmail(),(String) payload.get("name"),secretPsw);
+        TokenDto tokenRes = login(player,secretPsw);
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
-    private TokenDto login(Player player){
+    private TokenDto login(Player player,String password){
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(player.getEmail(), secretPsw)
+                new UsernamePasswordAuthenticationToken(player.getEmail(), password)
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateToken(authentication);
+        if(!Objects.equals(password, secretPsw))
+            jwt="Bearer ".concat(jwt);
         TokenDto tokenDto = new TokenDto();
         tokenDto.setValue(jwt);
         return tokenDto;
     }
 
-    private Player savePlayer(String email,String name){
-
-        Player player = new Player(email, passwordEncoder.encode(secretPsw),name, Calendar.getInstance());
+    private Player savePlayer(String email,String name,String password){
+        Player player = new Player(email, passwordEncoder.encode(password),name, Calendar.getInstance());
         Role roleUser = roleService.getByNameRole(roleName.ROLE_USER).get();
         Set<Role> roles = new HashSet<>();
         roles.add(roleUser);
