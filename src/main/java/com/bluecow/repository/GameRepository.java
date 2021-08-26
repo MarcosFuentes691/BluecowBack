@@ -13,6 +13,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     List<Game> findAllByPlayerAndHero(String player,String hero);
     List<Game> findAllByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
     Game getFirstByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
+    Game findFirstByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
     List<Game> findAllByPlayerAndTimestampAfterAndTimestampBefore(String player,Calendar after, Calendar before);
     List<Game> findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(String player,Calendar after, Calendar before, String hero);
 
