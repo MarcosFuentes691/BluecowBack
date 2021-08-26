@@ -1,12 +1,9 @@
 package com.bluecow.service;
 
-import com.bluecow.consts.ConstHeroes;
-import com.bluecow.entity.Game;
-import com.bluecow.entity.Hero;
-import com.bluecow.entity.Player;
-import com.bluecow.entity.Stats;
+import com.bluecow.entity.*;
 import com.bluecow.repository.GameRepository;
 import com.bluecow.repository.PlayerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +12,13 @@ import java.util.*;
 
 @Service
 @Transactional
+@Slf4j
 public class PlayerService {
 
     @Autowired
     PlayerRepository playerRepository;
     @Autowired
     GameRepository gameRepository;
-    Map<Integer,String> heroesMmr = new TreeMap<Integer,String>();
-    Map<Integer,String> heroesGames = new TreeMap<Integer,String>();
 
     public Optional<Player> getByEmail(String email){
         return playerRepository.findByEmail(email);
@@ -36,26 +32,75 @@ public class PlayerService {
         return playerRepository.save(player);
     }
 
+    private final HashMap<String,StatHero> statHeroMap= new HashMap<>();
+
     public ArrayList<Stats> getPlayerStats(String email){
-        Stats stat= makeStats(email,null);
-        return null;
+        ArrayList<Stats> statsArrayList = new ArrayList<>();
+        Calendar now = Calendar.getInstance();
+        Calendar past = Calendar.getInstance();
+        past.add(Calendar.DATE,-1);
+        statsArrayList.add(makeStats(email,now,past,"today",null));
+        now.add(Calendar.DATE,-1);
+        past.add(Calendar.DATE,-6);
+        statsArrayList.add(makeStats(email,now,past, "last week",statsArrayList.get(0)));
+        now.add(Calendar.DATE,-6);
+        past.add(Calendar.DATE,-23);
+        statsArrayList.add(makeStats(email,now,past, "last month",statsArrayList.get(statsArrayList.size()-1)));
+        now.add(Calendar.DATE,-23);
+        past.add(Calendar.DATE,-60);
+        statsArrayList.add(makeStats(email,now,past, "last 3 months",statsArrayList.get(statsArrayList.size()-1)));
+        now.add(Calendar.DATE,-60);
+        statsArrayList.add(makeStats(email,now,playerRepository.findByEmail(email).get().getCreationDate(), "always",statsArrayList.get(statsArrayList.size()-1)));
+        return statsArrayList;
     }
 
-    private Stats makeStats(String email, Stats prevStats){
-        if(prevStats==null){
-            Calendar now = Calendar.getInstance();
-            Calendar yest = Calendar.getInstance();
-            yest.add(Calendar.DATE,-1);
-            List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(email, yest, now);
-            for(String hero : ConstHeroes.heroList){
-                heroesMmr.put(0,hero);
-                heroesGames.put(0,hero);
+    private Stats makeStats(String email,Calendar to,Calendar from,String time,Stats prevStats){
+        Stats stat;
+        if(prevStats==null)
+            stat = new Stats(time);
+        else
+            stat = new Stats(prevStats);
+        stat.setTime(time);
+        from.add(Calendar.MINUTE,-1);
+        to.add(Calendar.MINUTE,1);
+        List<Game>games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(email, from , to);
+        for (int i = 0; i < games.size(); i++) {
+            Game game= games.get(i);
+            if(game.getMmr()>stat.getBestMmr())
+                stat.setBestMmr(game.getMmr());
+            if(game.getMmr()<stat.getWorstMmr())
+                stat.setWorstMmr(game.getMmr());
+            stat.setGamesPlayed(stat.getGamesPlayed()+1);
+            stat.setAvgMmr(stat.getAvgMmr()+game.getMmr());
+            Integer prevMmr=0;
+            if(i==0) {
+                Game prevGame = gameRepository.findFirstByIdIsLessThanAndPlayerOrderByIdDesc(game.getId(), email);
+                prevMmr = Objects.requireNonNullElse(prevGame, game).getMmr();
             }
-            Stats stat = new Stats("new stat");
+            if(i>0)
+                prevMmr = games.get(i-1).getMmr();
+            int mmrObtained=game.getMmr()-prevMmr;
+            stat.setAvgMmrGain(stat.getAvgMmrGain() + mmrObtained);
+            statHeroMap.putIfAbsent(game.getHero(), new StatHero(game.getHero()));
+            StatHero statHero = statHeroMap.get(game.getHero());
+            statHero.setMmr(statHero.getMmr()+mmrObtained);
+            statHero.setGamesPlayed(statHero.getGamesPlayed()+1);
+            statHeroMap.replace(game.getHero(),statHero);
         }
-        else {
-            //2,3,4 iteration
-        }
-        return null;
+        StatHero max = Collections.max(statHeroMap.values(),
+                (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
+        StatHero min = Collections.min(statHeroMap.values(),
+                (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
+        StatHero maxPlayed = Collections.max(statHeroMap.values(),
+                (a, b) -> Float.compare(a.getGamesPlayed(), b.getGamesPlayed()));
+        stat.setAvgMmrGain(stat.getAvgMmrGain()/stat.getGamesPlayed());
+        stat.setAvgMmr(stat.getAvgMmr()/stat.getGamesPlayed());
+        stat.setBestHero(max.getName());
+        stat.setBestHeroNumber(max.getMmr());
+        stat.setWorstHero(min.getName());
+        stat.setWorstHeroNumber(min.getMmr());
+        stat.setMostHero(maxPlayed.getName());
+        stat.setMostHeroNumber(maxPlayed.getGamesPlayed());
+        return stat;
     }
 }
