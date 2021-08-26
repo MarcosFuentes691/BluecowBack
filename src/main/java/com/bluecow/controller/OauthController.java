@@ -20,9 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.User;
-import org.springframework.social.facebook.api.impl.FacebookTemplate;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -73,20 +71,6 @@ public class OauthController {
             player = playerService.getByEmail(payload.getEmail()).get();
         else
             player = savePlayer(payload.getEmail(),(String) payload.get("name"));
-        TokenDto tokenRes = login(player);
-        return new ResponseEntity(tokenRes, HttpStatus.OK);
-    }
-
-    @PostMapping("/facebook")
-    public ResponseEntity<TokenDto> facebook(@RequestBody TokenDto tokenDto) throws IOException {
-        Facebook facebook = new FacebookTemplate(tokenDto.getValue());
-        final String [] fields = {"email", "picture"};
-        User user = facebook.fetchObject("me", User.class, fields);
-        Player player = new Player();
-        if(playerService.existsEmail(user.getEmail()))
-            player = playerService.getByEmail(user.getEmail()).get();
-        else
-            player = savePlayer(user.getEmail(),user.getName());
         TokenDto tokenRes = login(player);
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
