@@ -7,10 +7,14 @@ import com.bluecow.consts.roleName;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.PlayerService;
 import com.bluecow.service.RoleService;
+import com.bluecow.utility.BearerCleaner;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/oauth")
 @CrossOrigin
+@Slf4j
 public class OauthController {
 
     @Value("${google.clientId}")
@@ -52,9 +57,23 @@ public class OauthController {
     @Autowired
     RoleService roleService;
 
+    private static class LoginForm {
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        private String username;
+        private String password;
+    }
 
     @PostMapping("/user")
-    public ResponseEntity<TokenDto> user(@RequestParam String username, @RequestParam String password) throws IOException {
+    public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws IOException {
+        String username=loginForm.getUsername();
+        String password=loginForm.getPassword();
         Player player;
         if(playerService.existsEmail(username))
             player = playerService.getByEmail(username).get();
@@ -82,14 +101,26 @@ public class OauthController {
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<UserResponse> user (@RequestHeader("Authorization") String authReq) {
+        int i=0;
+        BearerCleaner bearerCleaner = new BearerCleaner();
+        authReq=bearerCleaner.cleanBearer(authReq);
+        Player player=playerService.getByEmail(authReq).get();
+        UserResponse userResponse;
+        if(player.getEmail().equals(player.getName()))
+            userResponse = new UserResponse(authReq);
+        else
+            userResponse = new UserResponse();
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
     private TokenDto login(Player player,String password){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(player.getEmail(), password)
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateToken(authentication);
-        if(!Objects.equals(password, secretPsw))
-            jwt="Bearer ".concat(jwt);
         TokenDto tokenDto = new TokenDto();
         tokenDto.setValue(jwt);
         return tokenDto;
@@ -104,4 +135,51 @@ public class OauthController {
         return playerService.save(player);
     }
 
+    private static class UserResponse{
+        boolean valid;
+        String name;
+        String email;
+        /*String authToken;
+        String id;
+        String provider;
+        String authorizationCode;
+        String firstName;
+        String idToken;
+        String lastName;
+        String photoUrl;*/
+
+        public UserResponse(String name) {
+            this.valid = true;
+            this.name = name;
+            this.email = name;
+        }
+
+        public UserResponse() {
+            this.valid = false;
+        }
+
+        public boolean isValid() {
+            return valid;
+        }
+
+        public void setValid(boolean valid) {
+            this.valid = valid;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
 }
