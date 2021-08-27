@@ -37,6 +37,8 @@ public class GameController {
                                         @RequestBody Game game){
         authReq=bearerCleaner.cleanBearer(authReq);
         game.setPlayer(authReq);
+        game.setHeroUrl("none");
+        game.setTimestampString("none");
         try {
             game=gameService.saveGame(game);
         }catch (Exception e){

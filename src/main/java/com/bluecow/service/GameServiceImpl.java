@@ -33,7 +33,10 @@ public class GameServiceImpl implements GameService{
             throw new Exception("Place not correct");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Calendar cal = Calendar.getInstance();
-        cal.setTime(sdf.parse(game.getTimestampString()));
+        if(game.getTimestampString().equals("none"))
+            cal.setTime(game.getTimestamp().getTime());
+        else
+            cal.setTime(sdf.parse(game.getTimestampString()));
         game.setTimestamp(cal);
         if(game.getTimestamp().after(Calendar.getInstance().getTime()))
             throw new Exception("Timestamp from the future"); //Why this doesnt work????
