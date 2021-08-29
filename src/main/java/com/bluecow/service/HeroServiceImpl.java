@@ -7,6 +7,7 @@ import com.bluecow.repository.HeroRepository;
 import com.bluecow.utility.HeroUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,7 @@ public class HeroServiceImpl implements HeroService{
     }
 
     private Hero makeHero(String playerEmail, String stringHero, Calendar from, Calendar to){
-        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,from,to,stringHero);
+        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,from,to,stringHero, PageRequest.of(0,50000)).getContent();
         Hero hero = new Hero();
         float avgPos = 0;
         int mmr = 0;
@@ -97,7 +98,7 @@ public class HeroServiceImpl implements HeroService{
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         Map<String,Hero> heroMap= new HashMap<>();
-        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo);
+        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo,PageRequest.of(0,50000)).getContent();
         for(Game game : games){
             heroMap.put(game.getHero(),new Hero(game.getHero()));
         }

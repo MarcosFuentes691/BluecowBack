@@ -20,7 +20,6 @@ import java.util.List;
 public class GameController {
 
     private final GameService gameService;
-    private final GameRepository gameRepository;
 
     @Autowired
     BearerCleaner bearerCleaner;
@@ -29,7 +28,6 @@ public class GameController {
 
     public GameController(GameService gameService,GameRepository gameRepository) {
         this.gameService = gameService;
-        this.gameRepository = gameRepository;
     }
 
     @PostMapping("/add")
@@ -81,25 +79,27 @@ public class GameController {
     }
 
     @GetMapping("/view")
-    public ResponseEntity<List<Game>> viewGames(@RequestHeader("Authorization") String authReq){
+    public ResponseEntity<List<Game>> viewGames(@RequestHeader("Authorization") String authReq,
+                                                @RequestParam int page,
+                                                @RequestParam int amount){
         authReq=bearerCleaner.cleanBearer(authReq);
-        return new ResponseEntity<>(gameService.viewGames(authReq), HttpStatus.OK);
+        return new ResponseEntity<>(gameService.viewGames(authReq,page,amount), HttpStatus.OK);
     }
 
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<?> searchGames(@RequestHeader("Authorization") String authReq,
-                                                  @RequestParam(required=false) String hero,
-                                                  @RequestParam(required=false) String from,
-                                                  @RequestParam(required=false) String to){
+                                         @RequestParam(required=false) String hero,
+                                         @RequestParam(required=false) String from,
+                                         @RequestParam(required=false) String to,
+                                         @RequestParam(required=false) String timeZone,
+                                         @RequestParam(required=false) int page,
+                                         @RequestParam(required=false) int amount){
         authReq=bearerCleaner.cleanBearer(authReq);
         try {
-            return new ResponseEntity<>(gameService.searchGames(authReq, hero, from, to), HttpStatus.OK);
+            return new ResponseEntity<>(gameService.searchGames(authReq, hero, from, to,page,amount,timeZone), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
-
-
-
 
 }

@@ -6,6 +6,8 @@ import com.bluecow.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,29 +67,32 @@ public class GameServiceImpl implements GameService{
     }
 
     @Override
-    public List<Game> viewGames(String playerEmail) {
-        return gameRepository.findAllByPlayerOrderByIdDesc(playerEmail);
+    public List<Game> viewGames(String playerEmail,int page,int amount) {
+        return gameRepository.findAllByPlayerOrderByIdDesc(playerEmail,PageRequest.of(page, amount)).getContent();
     }
 
 
     @Override
-    public List<Game> searchGames(String playerEmail, String hero, String from, String to) throws Exception {
-        if(!(heroUtility.heroExists(hero)))
+    public List<Game> searchGames(String playerEmail, String hero, String from, String to,int page,int amount,String timeZone) throws Exception {
+        if(hero.equals("All")||hero.equals("all"))
+            hero=null;
+        if(hero!=null && !(heroUtility.heroExists(hero)))
             throw new Exception("hero doesnt exists");
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        calFrom.setTime(sdf.parse(from));
-        calTo.setTime(sdf.parse(to));
-        if (calTo.getTime().before(calFrom.getTime()))
-                throw new Exception("Invalid dates");
         if(from==null)
             calFrom.setTime(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
+        else calFrom.setTime(sdf.parse(from));
         if(to==null)
             calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
+        else calTo.setTime(sdf.parse(to));
+        if (calTo.getTime().before(calFrom.getTime()))
+                throw new Exception("Invalid dates");
         if(hero==null)
-            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo);
-        else
-            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,calFrom,calTo,hero);
+            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo,PageRequest.of(page, amount)).getContent();
+        else {
+            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail, calFrom, calTo, hero, PageRequest.of(page, amount)).getContent();
+        }
     }
 }

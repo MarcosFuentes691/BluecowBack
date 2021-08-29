@@ -5,6 +5,7 @@ import com.bluecow.repository.GameRepository;
 import com.bluecow.repository.PlayerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +64,7 @@ public class PlayerService {
         stat.setTime(time);
         from.add(Calendar.MINUTE,-1);
         to.add(Calendar.MINUTE,1);
-        List<Game>games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(email, from , to);
+        List<Game>games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(email, from , to , PageRequest.of(0,50000)).getContent();
         for (int i = 0; i < games.size(); i++) {
             Game game= games.get(i);
             if(game.getMmr()>stat.getBestMmr())
