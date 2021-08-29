@@ -27,6 +27,15 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Autowired
     JwtEntryPoint jwtEntryPoint;
 
+    private static final String[] PUBLIC_URLS={
+            "/swagger-resources/**",
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/auth/**"
+    };
+
     @Bean
     JwtTokenFilter jwtTokenFilter(){
         return new JwtTokenFilter();
@@ -59,6 +68,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/hero/**").permitAll()//TODO take this out
                 .antMatchers("/oauth/**").permitAll()
+                .antMatchers(PUBLIC_URLS).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
