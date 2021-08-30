@@ -11,21 +11,19 @@ import java.util.List;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
 
-    @Query(value = "SELECT * FROM Game WHERE player = ?1 GROUP BY id ORDER BY id DESC",
-            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 GROUP BY id ORDER BY id DESC",
+    @Query(value = "SELECT * FROM Game WHERE player = ?1 GROUP BY id ORDER BY timestamp DESC",
+            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 GROUP BY id ORDER BY timestamp DESC",
             nativeQuery = true)
-    Page<Game> findAllByPlayerOrderByIdDesc(String player, Pageable pageable);
-    List<Game> findAllByPlayerAndHero(String player,String hero);
-    List<Game> findAllByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
-    Game getFirstByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
+    Page<Game> findAllGames(String player, Pageable pageable);
+    Game getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(Calendar timestamp, String player);
     Game findFirstByIdIsLessThanAndPlayerOrderByIdDesc(Long id, String player);
-    @Query(value = "SELECT * FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY id DESC",
-            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY id DESC",
+    @Query(value = "SELECT * FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY timestamp DESC",
+            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY timestamp DESC",
             nativeQuery = true)
-    Page<Game> findAllByPlayerAndTimestampAfterAndTimestampBefore(String player, Calendar after, Calendar before, Pageable pageable);
-    @Query(value = "SELECT * FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 and hero=?4 GROUP BY id ORDER BY id DESC",
-            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY id DESC",
+    Page<Game> findGamesInPeriod(String player, Calendar after, Calendar before, Pageable pageable);
+    @Query(value = "SELECT * FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 and hero=?4 GROUP BY id ORDER BY timestamp DESC",
+            countQuery = "SELECT count(*) FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY timestamp DESC",
             nativeQuery = true)
-    Page<Game> findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(String player, Calendar after, Calendar before, String hero, Pageable pageable);
+    Page<Game> findGamesInPeriodWithHero(String player, Calendar after, Calendar before, String hero, Pageable pageable);
 }
 

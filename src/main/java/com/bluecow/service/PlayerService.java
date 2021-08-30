@@ -64,7 +64,7 @@ public class PlayerService {
         stat.setTime(time);
         from.add(Calendar.MINUTE,-1);
         to.add(Calendar.MINUTE,1);
-        List<Game>games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(email, from , to , PageRequest.of(0,50000)).getContent();
+        List<Game>games = gameRepository.findGamesInPeriod(email, from , to , PageRequest.of(0,50000)).getContent();
         for (int i = 0; i < games.size(); i++) {
             Game game= games.get(i);
             if(game.getMmr()>stat.getBestMmr())

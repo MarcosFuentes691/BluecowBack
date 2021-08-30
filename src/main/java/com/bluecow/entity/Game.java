@@ -38,5 +38,7 @@ public class Game {
     private String heroUrl;
     @Transient
     private String timestampString;
+    @Transient
+    private Integer difference;
 
 }

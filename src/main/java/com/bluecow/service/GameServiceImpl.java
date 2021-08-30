@@ -6,17 +6,13 @@ import com.bluecow.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +65,7 @@ public class GameServiceImpl implements GameService{
 
     @Override
     public List<Game> viewGames(String playerEmail,int page,int amount) {
-        return gameRepository.findAllByPlayerOrderByIdDesc(playerEmail,PageRequest.of(page, amount)).getContent();
+        return gameRepository.findAllGames(playerEmail,PageRequest.of(page, amount)).getContent();
     }
 
 
@@ -105,10 +101,30 @@ public class GameServiceImpl implements GameService{
         calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
                 throw new Exception("Invalid dates");
+        List<Game> games;
         if(hero==null)
-            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo,PageRequest.of(page, amount)).getContent();
+            games= gameRepository.findGamesInPeriod(playerEmail,calFrom,calTo,PageRequest.of(page, amount)).getContent();
         else {
-            return gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail, calFrom, calTo, hero, PageRequest.of(page, amount)).getContent();
+            games= gameRepository.findGamesInPeriodWithHero(playerEmail, calFrom, calTo, hero, PageRequest.of(page, amount)).getContent();
         }
+        /*calc diffrence
+        for(int i=0;i< games.size();i++){
+            int diff=0;
+            if(i==0) {
+                try{
+                    Game prevGame=gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(games.get(i).getTimestamp(), playerEmail);
+                    diff=prevGame.getMmr()-games.get(i).getMmr();
+                    games.get(i).setDifference(diff);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                    games.get(i).setDifference(0);
+                }
+            }
+            else {
+                diff=games.get(i-1).getMmr()-games.get(i).getMmr();
+                games.get(i).setDifference(diff);
+            }
+        }*/
+        return games;
     }
 }

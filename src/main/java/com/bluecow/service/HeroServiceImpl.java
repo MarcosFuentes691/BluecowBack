@@ -57,7 +57,7 @@ public class HeroServiceImpl implements HeroService{
     }
 
     private Hero makeHero(String playerEmail, String stringHero, Calendar from, Calendar to){
-        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBeforeAndHero(playerEmail,from,to,stringHero, PageRequest.of(0,50000)).getContent();
+        List<Game> games = gameRepository.findGamesInPeriodWithHero(playerEmail,from,to,stringHero, PageRequest.of(0,50000)).getContent();
         Hero hero = new Hero();
         float avgPos = 0;
         int mmr = 0;
@@ -65,7 +65,7 @@ public class HeroServiceImpl implements HeroService{
         cal.setTimeInMillis(1);
         hero.setLastUse(cal);
         for (Game actualGame : games) {
-            Game previousGame = gameRepository.getFirstByIdIsLessThanAndPlayerOrderByIdDesc(actualGame.getId(), playerEmail);
+            Game previousGame = gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(actualGame.getTimestamp(), playerEmail);//TODO i changed this method so take a look at this
             avgPos += actualGame.getPlace();
             if (previousGame == null) {
                 mmr += actualGame.getMmr();
@@ -98,7 +98,7 @@ public class HeroServiceImpl implements HeroService{
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         Map<String,Hero> heroMap= new HashMap<>();
-        List<Game> games = gameRepository.findAllByPlayerAndTimestampAfterAndTimestampBefore(playerEmail,calFrom,calTo,PageRequest.of(0,50000)).getContent();
+        List<Game> games = gameRepository.findGamesInPeriod(playerEmail,calFrom,calTo,PageRequest.of(0,50000)).getContent();
         for(Game game : games){
             heroMap.put(game.getHero(),new Hero(game.getHero()));
         }
