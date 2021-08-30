@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -78,15 +79,30 @@ public class GameServiceImpl implements GameService{
             hero=null;
         if(hero!=null && !(heroUtility.heroExists(hero)))
             throw new Exception("hero doesnt exists");
+        int timeZoneInt=0;
+        if(!(to.equals("now"))){
+            timeZone=timeZone.substring(0,3);
+            timeZoneInt=Integer.parseInt(timeZone);
+            timeZoneInt=60*(-timeZoneInt);
+        }else
+            timeZoneInt=Integer.parseInt(timeZone);
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        if(from==null)
-            calFrom.setTime(Timestamp.valueOf(LocalDateTime.of(2014,1,1,1,1)));
-        else calFrom.setTime(sdf.parse(from));
-        if(to==null)
-            calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
-        else calTo.setTime(sdf.parse(to));
+        if(from.equals("Last week"))
+            calFrom.add(Calendar.DATE,-6);
+        else if(from.equals("Last month"))
+            calFrom.add(Calendar.MONTH,-1);
+        else if(from.equals("Always"))
+            calFrom.add(Calendar.YEAR,-20);
+        else if(!(from.equals("Today")))
+            calFrom.setTime(sdf.parse(from));
+        if(!(to.equals("now")))
+            calTo.setTime(sdf.parse(to));
+        calFrom.set(Calendar.HOUR_OF_DAY,0);
+        calFrom.set(Calendar.MINUTE,0);
+        calFrom.add(Calendar.MINUTE,timeZoneInt);
+        calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
                 throw new Exception("Invalid dates");
         if(hero==null)
