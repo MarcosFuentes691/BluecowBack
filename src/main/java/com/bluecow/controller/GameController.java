@@ -51,9 +51,9 @@ public class GameController {
         return null;
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deleteGame(@RequestHeader("Authorization") String authReq,
-                                             @PathVariable("id") Long id) {
+                                             @RequestParam("id") Long id) {
         authReq=bearerCleaner.cleanBearer(authReq);
         try {
             gameService.deleteGameById(id,authReq);

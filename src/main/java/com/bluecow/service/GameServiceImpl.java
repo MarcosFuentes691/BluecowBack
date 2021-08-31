@@ -41,6 +41,14 @@ public class GameServiceImpl implements GameService{
             throw new Exception("Timestamp from the future"); //Why this doesnt work????
         if(!(heroUtility.heroExists(game.getHero())))
             throw new Exception("Hero not correct");
+        try{
+            Game prevGame=gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(game.getTimestamp(), game.getPlayer());
+            int diff=game.getMmr()-prevGame.getMmr();
+            game.setDifference(diff);
+        }catch (Exception e) {
+            e.printStackTrace();
+            game.setDifference(0);
+        }
         return gameRepository.save(game);
     }
 
@@ -107,24 +115,6 @@ public class GameServiceImpl implements GameService{
         else {
             games= gameRepository.findGamesInPeriodWithHero(playerEmail, calFrom, calTo, hero, PageRequest.of(page, amount)).getContent();
         }
-        /*calc diffrence
-        for(int i=0;i< games.size();i++){
-            int diff=0;
-            if(i==0) {
-                try{
-                    Game prevGame=gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(games.get(i).getTimestamp(), playerEmail);
-                    diff=prevGame.getMmr()-games.get(i).getMmr();
-                    games.get(i).setDifference(diff);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                    games.get(i).setDifference(0);
-                }
-            }
-            else {
-                diff=games.get(i-1).getMmr()-games.get(i).getMmr();
-                games.get(i).setDifference(diff);
-            }
-        }*/
         return games;
     }
 }

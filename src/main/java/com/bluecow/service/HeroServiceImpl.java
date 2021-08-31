@@ -30,27 +30,41 @@ public class HeroServiceImpl implements HeroService{
     HeroUtility heroUtility = new HeroUtility();
 
     @Override
-    public Collection<Hero> viewHeroes(String playerEmail, String from, String to) throws Exception {
-        return makeHeroes(playerEmail,from,to);
+    public Collection<Hero> viewHeroes(String playerEmail, String from, String to,String timeZone) throws Exception {
+        return makeHeroes(playerEmail,from,to,timeZone);
     }
 
 
     @Override
-    public Hero searchHero(String playerEmail, String stringHero, String from, String to) throws Exception {
+    public Hero searchHero(String playerEmail, String stringHero, String from, String to,String timeZone) throws Exception {
         if(!(heroUtility.heroExists(stringHero)))
             throw new Exception("hero doesnt exists");
         if(from==null && to==null)
             return heroRepository.findByPlayerAndName(playerEmail,stringHero);
+        int timeZoneInt=0;
+        if(!(to.equals("now"))){
+            timeZone=timeZone.substring(0,3);
+            timeZoneInt=Integer.parseInt(timeZone);
+            timeZoneInt=60*(-timeZoneInt);
+        }else
+            timeZoneInt=Integer.parseInt(timeZone);
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
-        if(from==null)
-            calFrom.setTime(Date.from(Instant.EPOCH));
-        else
-            calFrom.setTime(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS").parse(from));
-        if(to==null)
-            calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
-        else
-            calTo.setTime(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS").parse(to));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        if(from.equals("Last week"))
+            calFrom.add(Calendar.DATE,-6);
+        else if(from.equals("Last month"))
+            calFrom.add(Calendar.MONTH,-1);
+        else if(from.equals("Always"))
+            calFrom.add(Calendar.YEAR,-20);
+        else if(!(from.equals("Today")))
+            calFrom.setTime(sdf.parse(from));
+        if(!(to.equals("now")))
+            calTo.setTime(sdf.parse(to));
+        calFrom.set(Calendar.HOUR_OF_DAY,0);
+        calFrom.set(Calendar.MINUTE,0);
+        calFrom.add(Calendar.MINUTE,timeZoneInt);
+        calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         return makeHero(playerEmail,stringHero,calFrom,calTo);
@@ -68,9 +82,9 @@ public class HeroServiceImpl implements HeroService{
             Game previousGame = gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(actualGame.getTimestamp(), playerEmail);//TODO i changed this method so take a look at this
             avgPos += actualGame.getPlace();
             if (previousGame == null) {
-                mmr += actualGame.getMmr();
+                mmr += 0;
             } else {
-                mmr += actualGame.getMmr() - previousGame.getMmr();
+                mmr += actualGame.getDifference();
             }
             if (actualGame.getTimestamp().after(hero.getLastUse()))
                 hero.setLastUse(actualGame.getTimestamp());
@@ -84,17 +98,31 @@ public class HeroServiceImpl implements HeroService{
         return hero;
     }
 
-    private Collection<Hero> makeHeroes(String playerEmail, String from, String to) throws Exception {
+    private Collection<Hero> makeHeroes(String playerEmail, String from, String to,String timeZone) throws Exception {
+        int timeZoneInt=0;
+        if(!(to.equals("now"))){
+            timeZone=timeZone.substring(0,3);
+            timeZoneInt=Integer.parseInt(timeZone);
+            timeZoneInt=60*(-timeZoneInt);
+        }else
+            timeZoneInt=Integer.parseInt(timeZone);
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
-        if(from==null)
-            calFrom.setTime(Date.from(Instant.EPOCH));
-        else
-            calFrom.setTime(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS").parse(from));
-        if(to==null)
-            calTo.setTime(Timestamp.valueOf(LocalDateTime.of(2030,1,1,1,1)));
-        else
-            calTo.setTime(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS").parse(to));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        if(from.equals("Last week"))
+            calFrom.add(Calendar.DATE,-6);
+        else if(from.equals("Last month"))
+            calFrom.add(Calendar.MONTH,-1);
+        else if(from.equals("Always"))
+            calFrom.add(Calendar.YEAR,-20);
+        else if(!(from.equals("Today")))
+            calFrom.setTime(sdf.parse(from));
+        if(!(to.equals("now")))
+            calTo.setTime(sdf.parse(to));
+        calFrom.set(Calendar.HOUR_OF_DAY,0);
+        calFrom.set(Calendar.MINUTE,0);
+        calFrom.add(Calendar.MINUTE,timeZoneInt);
+        calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         Map<String,Hero> heroMap= new HashMap<>();
@@ -110,17 +138,14 @@ public class HeroServiceImpl implements HeroService{
                 previousGame = games.get(i-1);
             else
                 previousGame = null;
-            int mmr = 0;
             if (previousGame == null) {
-                mmr += actualGame.getMmr();
                 gameHero.setAvgPlace((float)actualGame.getPlace());
             } else {
-                mmr += actualGame.getMmr() - previousGame.getMmr();
                 gameHero.setAvgPlace((gameHero.getAvgPlace() * gameHero.getGamesPlayed() + actualGame.getPlace()) / (gameHero.getGamesPlayed() + 1));
             }
             if (actualGame.getTimestamp().after(heroMap.get(actualGame.getHero()).getLastUse()))
                 gameHero.setLastUse(actualGame.getTimestamp());
-            gameHero.setMmr(gameHero.getMmr()+mmr);
+            gameHero.setMmr(gameHero.getMmr()+ actualGame.getDifference());
             gameHero.setGamesPlayed(gameHero.getGamesPlayed()+1);
             heroMap.replace(actualGame.getHero(),gameHero);
         }

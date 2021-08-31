@@ -33,11 +33,12 @@ public class HeroController {
     @GetMapping("/all")
     public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq,
                                         @RequestParam(required=false) String from,
-                                        @RequestParam(required=false) String to){
+                                        @RequestParam(required=false) String to,
+                                        @RequestParam(required=false) String timeZone){
         authReq=bearerCleaner.cleanBearer(authReq);
         Collection<Hero> heroes;
         try {
-            heroes=heroService.viewHeroes(authReq,from,to);
+            heroes=heroService.viewHeroes(authReq,from,to,timeZone);
         }
         catch(Exception e) {
             return ResponseEntity.status(400).body(e.getMessage());
@@ -49,10 +50,12 @@ public class HeroController {
     public ResponseEntity<?> searchHero(@RequestHeader("Authorization") String authReq,
                                          @RequestParam(required=false) String hero,
                                          @RequestParam(required=false) String from,
-                                         @RequestParam(required=false) String to){
+                                         @RequestParam(required=false) String to,
+                                        @RequestParam(required=false) String timeZone
+                                        ){
         authReq=bearerCleaner.cleanBearer(authReq);
         try {
-            return new ResponseEntity<>(heroService.searchHero(authReq, hero, from, to), HttpStatus.OK);
+            return new ResponseEntity<>(heroService.searchHero(authReq, hero, from, to,timeZone), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
