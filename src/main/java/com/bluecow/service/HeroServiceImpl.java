@@ -3,7 +3,6 @@ package com.bluecow.service;
 import com.bluecow.entity.Game;
 import com.bluecow.entity.Hero;
 import com.bluecow.repository.GameRepository;
-import com.bluecow.repository.HeroRepository;
 import com.bluecow.utility.HeroUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -25,7 +21,6 @@ import java.util.*;
 public class HeroServiceImpl implements HeroService{
 
     private final GameRepository gameRepository;
-    private final HeroRepository heroRepository;
 
     HeroUtility heroUtility = new HeroUtility();
 
@@ -39,8 +34,6 @@ public class HeroServiceImpl implements HeroService{
     public Hero searchHero(String playerEmail, String stringHero, String from, String to,String timeZone) throws Exception {
         if(!(heroUtility.heroExists(stringHero)))
             throw new Exception("hero doesnt exists");
-        if(from==null && to==null)
-            return heroRepository.findByPlayerAndName(playerEmail,stringHero);
         int timeZoneInt=0;
         if(!(to.equals("now"))){
             timeZone=timeZone.substring(0,3);
@@ -75,23 +68,20 @@ public class HeroServiceImpl implements HeroService{
         Hero hero = new Hero();
         float avgPos = 0;
         int mmr = 0;
+        int[] positions = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(1);
         hero.setLastUse(cal);
         for (Game actualGame : games) {
-            Game previousGame = gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(actualGame.getTimestamp(), playerEmail);//TODO i changed this method so take a look at this
             avgPos += actualGame.getPlace();
-            if (previousGame == null) {
-                mmr += 0;
-            } else {
-                mmr += actualGame.getDifference();
-            }
+            mmr += actualGame.getDifference();
             if (actualGame.getTimestamp().after(hero.getLastUse()))
                 hero.setLastUse(actualGame.getTimestamp());
+            positions[actualGame.getPlace()-1]++;
         }
         hero.setMmr(mmr);
+        hero.setPositions(positions);
         hero.setAvgPlace(avgPos/games.size());
-        hero.setHeroUrl(stringHero);
         hero.setName(stringHero);
         hero.setPlayer(playerEmail);
         hero.setGamesPlayed(games.size());

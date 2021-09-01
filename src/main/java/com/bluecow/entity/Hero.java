@@ -8,22 +8,16 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Hero {
-    @Id
-    @SequenceGenerator(
-            name="gameid_sequence",
-            sequenceName = "gameid_sequence",
-            initialValue=195,
-            allocationSize=1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="gameid_sequence")
     private Long id;
     @NotNull
     private String player;
@@ -37,8 +31,8 @@ public class Hero {
     private String name;
     @NotNull
     private Integer gamesPlayed;
-    @Transient
-    private String heroUrl;
+
+    private int[] positions;
 
     public Hero(String name) {
         this.name = name;
@@ -48,5 +42,6 @@ public class Hero {
         Calendar cal = Calendar.getInstance();
         cal.setTime(Date.from(Instant.EPOCH));
         this.lastUse = cal;
+        this.positions= new int[]{0, 0, 0, 0, 0, 0, 0, 0};
     }
 }
