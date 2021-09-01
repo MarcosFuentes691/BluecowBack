@@ -58,6 +58,10 @@ public class GameServiceImpl implements GameService{
             throw new Exception("Game not found");
         if(!(player.equals(gameRepository.findById(id).get().getPlayer())))
             throw new Exception("Not allowed");
+        Game nextGame=gameRepository.getFirstByTimestampIsGreaterThanAndPlayerOrderByTimestampAsc(gameRepository.findById(id).get().getTimestamp(), gameRepository.findById(id).get().getPlayer());
+        Game prevGame=gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc(gameRepository.findById(id).get().getTimestamp(), gameRepository.findById(id).get().getPlayer());
+        nextGame.setDifference(nextGame.getMmr()-prevGame.getMmr());
+        gameRepository.save(nextGame);
         gameRepository.delete(gameRepository.findById(id).get());
         return true;
     }
