@@ -26,5 +26,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             countQuery = "SELECT count(*) FROM Game WHERE player = ?1 and timestamp>?2 and timestamp< ?3 GROUP BY id ORDER BY timestamp DESC",
             nativeQuery = true)
     Page<Game> findGamesInPeriodWithHero(String player, Calendar after, Calendar before, String hero, Pageable pageable);
+    Game getFirstByTimestampIsGreaterThanAndPlayerOrderByTimestampAsc(Calendar timestamp, String player);
 }
 
