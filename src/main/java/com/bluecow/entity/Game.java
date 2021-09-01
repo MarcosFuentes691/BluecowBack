@@ -18,11 +18,11 @@ public class Game {
 
     @Id
     @SequenceGenerator(
-            name="gameid_sequence",
-            sequenceName = "gameid_sequence",
-            initialValue=195,
+            name="gameid_sequence2",
+            sequenceName = "gameid_sequence2",
+            initialValue=1400,
             allocationSize=1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="gameid_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="gameid_sequence2")
     private Long id;
     @NotNull
     private String player;
@@ -38,7 +38,6 @@ public class Game {
     private String heroUrl;
     @Transient
     private String timestampString;
-    @Transient
     private Integer difference;
 
 }
