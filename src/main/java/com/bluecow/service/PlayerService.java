@@ -55,53 +55,50 @@ public class PlayerService {
         return statsArrayList;
     }
 
-    private Stats makeStats(String email,Calendar to,Calendar from,String time,Stats prevStats){
+    public Stats makeStats(String email,Calendar from,Calendar to,String time,Stats prevStats) {
         Stats stat;
-        if(prevStats==null)
+        if (prevStats == null)
             stat = new Stats(time);
         else
             stat = new Stats(prevStats);
         stat.setTime(time);
-        from.add(Calendar.MINUTE,-1);
-        to.add(Calendar.MINUTE,1);
-        List<Game>games = gameRepository.findGamesInPeriod(email, from , to , PageRequest.of(0,50000)).getContent();
+        from.add(Calendar.MINUTE, -1);
+        to.add(Calendar.MINUTE, 1);
+        List<Game> games = gameRepository.findGamesInPeriod(email, from, to, PageRequest.of(0, 50000)).getContent();
         for (int i = 0; i < games.size(); i++) {
-            Game game= games.get(i);
-            if(game.getMmr()>stat.getBestMmr())
+            Game game = games.get(i);
+            if (game.getMmr() > stat.getBestMmr())
                 stat.setBestMmr(game.getMmr());
-            if(game.getMmr()<stat.getWorstMmr())
+            if (game.getMmr() < stat.getWorstMmr())
                 stat.setWorstMmr(game.getMmr());
-            stat.setGamesPlayed(stat.getGamesPlayed()+1);
-            stat.setAvgMmr(stat.getAvgMmr()+game.getMmr());
-            Integer prevMmr=0;
-            if(i==0) {
-                Game prevGame = gameRepository.findFirstByIdIsLessThanAndPlayerOrderByIdDesc(game.getId(), email);
-                prevMmr = Objects.requireNonNullElse(prevGame, game).getMmr();
-            }
-            if(i>0)
-                prevMmr = games.get(i-1).getMmr();
-            int mmrObtained=game.getMmr()-prevMmr;
+            stat.setGamesPlayed(stat.getGamesPlayed() + 1);
+            stat.setAvgMmr(stat.getAvgMmr() + game.getMmr());
+            Integer prevMmr = 0;
+            int mmrObtained = 0;
+            mmrObtained += game.getDifference();
             stat.setAvgMmrGain(stat.getAvgMmrGain() + mmrObtained);
             statHeroMap.putIfAbsent(game.getHero(), new StatHero(game.getHero()));
             StatHero statHero = statHeroMap.get(game.getHero());
-            statHero.setMmr(statHero.getMmr()+mmrObtained);
-            statHero.setGamesPlayed(statHero.getGamesPlayed()+1);
-            statHeroMap.replace(game.getHero(),statHero);
+            statHero.setMmr(statHero.getMmr() + mmrObtained);
+            statHero.setGamesPlayed(statHero.getGamesPlayed() + 1);
+            statHeroMap.replace(game.getHero(), statHero);
         }
-        StatHero max = Collections.max(statHeroMap.values(),
-                (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
-        StatHero min = Collections.min(statHeroMap.values(),
-                (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
-        StatHero maxPlayed = Collections.max(statHeroMap.values(),
-                (a, b) -> Float.compare(a.getGamesPlayed(), b.getGamesPlayed()));
-        stat.setAvgMmrGain(stat.getAvgMmrGain()/stat.getGamesPlayed());
-        stat.setAvgMmr(stat.getAvgMmr()/stat.getGamesPlayed());
-        stat.setBestHero(max.getName());
-        stat.setBestHeroNumber(max.getMmr());
-        stat.setWorstHero(min.getName());
-        stat.setWorstHeroNumber(min.getMmr());
-        stat.setMostHero(maxPlayed.getName());
-        stat.setMostHeroNumber(maxPlayed.getGamesPlayed());
+        if (statHeroMap.size() > 0){
+            StatHero max = Collections.max(statHeroMap.values(),
+                        (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
+            StatHero min = Collections.min(statHeroMap.values(),
+                    (a, b) -> Float.compare(a.getMmr(), b.getMmr()));
+            StatHero maxPlayed = Collections.max(statHeroMap.values(),
+                    (a, b) -> Float.compare(a.getGamesPlayed(), b.getGamesPlayed()));
+            stat.setAvgMmrGain(stat.getAvgMmrGain() / stat.getGamesPlayed());
+            stat.setAvgMmr(stat.getAvgMmr() / stat.getGamesPlayed());
+            stat.setBestHero(max.getName());
+            stat.setBestHeroNumber(max.getMmr());
+            stat.setWorstHero(min.getName());
+            stat.setWorstHeroNumber(min.getMmr());
+            stat.setMostHero(maxPlayed.getName());
+            stat.setMostHeroNumber(maxPlayed.getGamesPlayed());
+        }
         return stat;
     }
 }
