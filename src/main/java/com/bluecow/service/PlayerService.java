@@ -64,6 +64,7 @@ public class PlayerService {
         stat.setTime(time);
         from.add(Calendar.MINUTE, -1);
         to.add(Calendar.MINUTE, 1);
+        int[] positions = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         List<Game> games = gameRepository.findGamesInPeriod(email, from, to, PageRequest.of(0, 50000)).getContent();
         for (int i = 0; i < games.size(); i++) {
             Game game = games.get(i);
@@ -77,6 +78,7 @@ public class PlayerService {
             int mmrObtained = 0;
             mmrObtained += game.getDifference();
             stat.setAvgMmrGain(stat.getAvgMmrGain() + mmrObtained);
+            positions[games.get(i).getPlace()-1]++;
             statHeroMap.putIfAbsent(game.getHero(), new StatHero(game.getHero()));
             StatHero statHero = statHeroMap.get(game.getHero());
             statHero.setMmr(statHero.getMmr() + mmrObtained);
@@ -97,6 +99,7 @@ public class PlayerService {
             stat.setWorstHero(min.getName());
             stat.setWorstHeroNumber(min.getMmr());
             stat.setMostHero(maxPlayed.getName());
+            stat.setPositions(positions);
             stat.setMostHeroNumber(maxPlayed.getGamesPlayed());
         }
         return stat;
