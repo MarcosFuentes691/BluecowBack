@@ -65,6 +65,7 @@ public class PlayerService {
         from.add(Calendar.MINUTE, -1);
         to.add(Calendar.MINUTE, 1);
         int[] positions = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+        Calendar endMmrStamp = null;
         List<Game> games = gameRepository.findGamesInPeriod(email, from, to, PageRequest.of(0, 50000)).getContent();
         for (int i = 0; i < games.size(); i++) {
             Game game = games.get(i);
@@ -72,6 +73,20 @@ public class PlayerService {
                 stat.setBestMmr(game.getMmr());
             if (game.getMmr() < stat.getWorstMmr())
                 stat.setWorstMmr(game.getMmr());
+            if(i==0){
+                stat.setEndMmr(gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc
+                        (game.getTimestamp(),game.getPlayer()).getMmr());
+                endMmrStamp=(gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc
+                        (game.getTimestamp(),game.getPlayer()).getTimestamp());
+            }
+            else if(endMmrStamp.before(game.getTimestamp())) {
+                    stat.setEndMmr(game.getMmr());
+                    endMmrStamp = game.getTimestamp();
+                }
+            if(i==games.size()-1) {
+                stat.setStartMmr(gameRepository.getFirstByTimestampIsLessThanAndPlayerOrderByTimestampDesc
+                        (game.getTimestamp(), game.getPlayer()).getMmr());
+            }
             stat.setGamesPlayed(stat.getGamesPlayed() + 1);
             stat.setAvgMmr(stat.getAvgMmr() + game.getMmr());
             Integer prevMmr = 0;

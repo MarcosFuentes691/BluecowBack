@@ -26,6 +26,8 @@ public class Stats {
     private int worstHeroNumber;
     private String time;//today,week,month,always
     private int[] positions;
+    private int startMmr;
+    private int endMmr;
 
     public Stats(String time) {
         this.time = time;
@@ -41,6 +43,8 @@ public class Stats {
         this.mostHeroNumber=0;
         this.positions= new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         this.bestHeroNumber=0;
+        this.startMmr=0;
+        this.endMmr=0;
     }
 
     public Stats(Stats prevStats) {
@@ -57,6 +61,7 @@ public class Stats {
         this.worstHeroNumber=prevStats.getWorstHeroNumber();
         this.bestHeroNumber=prevStats.getBestHeroNumber();
         this.positions= prevStats.getPositions();
-
+        this.startMmr=prevStats.getStartMmr();
+        this.startMmr=prevStats.getEndMmr();
     }
 }
