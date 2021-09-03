@@ -38,7 +38,7 @@ public class GameServiceImpl implements GameService{
             cal.setTime(sdf.parse(game.getTimestampString()));
         game.setTimestamp(cal);
         if(game.getTimestamp().after(Calendar.getInstance().getTime()))
-            throw new Exception("Timestamp from the future"); //Why this doesnt work????
+            throw new Exception("Timestamp from the future");
         if(!(heroUtility.heroExists(game.getHero())))
             throw new Exception("Hero not correct");
         try{
@@ -109,8 +109,11 @@ public class GameServiceImpl implements GameService{
             calTo.setTime(sdf.parse(to));
         calFrom.set(Calendar.HOUR_OF_DAY,0);
         calFrom.set(Calendar.MINUTE,0);
-        calFrom.add(Calendar.MINUTE,timeZoneInt);
-        calTo.add(Calendar.MINUTE,timeZoneInt);
+        calFrom.set(Calendar.SECOND,0);
+        log.info(calFrom.getTime().toString());
+        log.info(calTo.getTime().toString());
+        //calFrom.add(Calendar.MINUTE,timeZoneInt);
+        //calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
                 throw new Exception("Invalid dates");
         List<Game> games;
