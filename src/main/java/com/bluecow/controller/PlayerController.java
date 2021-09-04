@@ -50,10 +50,15 @@ public class PlayerController {
         int timeZoneInt=0;
         if(!(to.equals("now"))){
             timeZone=timeZone.substring(0,3);
+            log.info(String.valueOf(timeZone.charAt(0)));
+            if(timeZone.charAt(0) != '-') {
+                timeZone = timeZone.substring(1);
+            }
             timeZoneInt=Integer.parseInt(timeZone);
             timeZoneInt=60*(-timeZoneInt);
         }else
             timeZoneInt=Integer.parseInt(timeZone);
+        timeZoneInt-=180; ///////TODO remove this when is in heroku
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
@@ -65,18 +70,25 @@ public class PlayerController {
             calFrom.add(Calendar.YEAR,-20);
         else if(!(from.equals("Today")))
             calFrom.setTime(sdf.parse(from));
-        if(!(to.equals("now")))
+        if(!(to.equals("now"))) {
             calTo.setTime(sdf.parse(to));
+            calTo.set(Calendar.HOUR_OF_DAY,23);
+            calTo.set(Calendar.MINUTE,59);
+            calTo.set(Calendar.SECOND,59);
+        }
         calFrom.set(Calendar.HOUR_OF_DAY,0);
         calFrom.set(Calendar.MINUTE,0);
+        calFrom.set(Calendar.SECOND,0);
         calFrom.add(Calendar.MINUTE,timeZoneInt);
         calTo.add(Calendar.MINUTE,timeZoneInt);
-        calTo.add(Calendar.DATE,1);//because it comes the same date from frontend
+        log.info(calFrom.getTime().toString());
+        log.info(calTo.getTime().toString());
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         try {
-            return new ResponseEntity<>(playerService.makeStats(authReq,calFrom,calTo,"date",null),HttpStatus.OK);
+            return new ResponseEntity<>(playerService.makeStats(authReq,calTo,calFrom,"date",null),HttpStatus.OK);
         }catch (Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

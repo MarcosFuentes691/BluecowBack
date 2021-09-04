@@ -41,7 +41,7 @@ public class PlayerService {
         Calendar now = Calendar.getInstance();
         Calendar past = Calendar.getInstance();
         past.add(Calendar.DATE,-1);
-        statsArrayList.add(makeStats(email,now,past,"today",null));
+        statsArrayList.add(makeStats(email,now,past,"Last 24 hr",null));
         now.add(Calendar.DATE,-1);
         past.add(Calendar.DATE,-6);
         statsArrayList.add(makeStats(email,now,past, "last week",statsArrayList.get(0)));
@@ -66,6 +66,10 @@ public class PlayerService {
             stat = new Stats(time);
         else
             stat = new Stats(prevStats);
+
+        log.info(from.getTime().toString());
+        log.info(to.getTime().toString());
+
         stat.setTime(time);
         int[] positions = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         Calendar endMmrStamp = null;

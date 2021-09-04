@@ -37,10 +37,15 @@ public class HeroServiceImpl implements HeroService{
         int timeZoneInt=0;
         if(!(to.equals("now"))){
             timeZone=timeZone.substring(0,3);
+            log.info(String.valueOf(timeZone.charAt(0)));
+            if(timeZone.charAt(0) != '-') {
+                timeZone = timeZone.substring(1);
+            }
             timeZoneInt=Integer.parseInt(timeZone);
             timeZoneInt=60*(-timeZoneInt);
         }else
             timeZoneInt=Integer.parseInt(timeZone);
+        timeZoneInt-=180; ///////TODO remove this when is in heroku
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
@@ -56,6 +61,7 @@ public class HeroServiceImpl implements HeroService{
             calTo.setTime(sdf.parse(to));
         calFrom.set(Calendar.HOUR_OF_DAY,0);
         calFrom.set(Calendar.MINUTE,0);
+        calFrom.set(Calendar.SECOND,0);
         calFrom.add(Calendar.MINUTE,timeZoneInt);
         calTo.add(Calendar.MINUTE,timeZoneInt);
         if (calTo.getTime().before(calFrom.getTime()))
@@ -92,10 +98,15 @@ public class HeroServiceImpl implements HeroService{
         int timeZoneInt=0;
         if(!(to.equals("now"))){
             timeZone=timeZone.substring(0,3);
+            log.info(String.valueOf(timeZone.charAt(0)));
+            if(timeZone.charAt(0) != '-') {
+                timeZone = timeZone.substring(1);
+            }
             timeZoneInt=Integer.parseInt(timeZone);
             timeZoneInt=60*(-timeZoneInt);
         }else
             timeZoneInt=Integer.parseInt(timeZone);
+        timeZoneInt-=180; ///////TODO remove this when is in heroku
         Calendar calFrom = Calendar.getInstance();
         Calendar calTo = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
@@ -111,8 +122,11 @@ public class HeroServiceImpl implements HeroService{
             calTo.setTime(sdf.parse(to));
         calFrom.set(Calendar.HOUR_OF_DAY,0);
         calFrom.set(Calendar.MINUTE,0);
+        calFrom.set(Calendar.SECOND,0);
         calFrom.add(Calendar.MINUTE,timeZoneInt);
         calTo.add(Calendar.MINUTE,timeZoneInt);
+        log.info(calFrom.getTime().toString());
+        log.info(calTo.getTime().toString());
         if (calTo.getTime().before(calFrom.getTime()))
             throw new Exception("Invalid dates");
         Map<String,Hero> heroMap= new HashMap<>();
