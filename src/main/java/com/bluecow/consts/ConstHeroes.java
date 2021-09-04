@@ -67,7 +67,9 @@ public class ConstHeroes {
             "Y'Shaarj",
             "Yogg",
             "Ysera",
-            "Zephrys"
+            "Zephrys",
+            "Nguyen",
+            "Cariel"
             ));
 
     public static Map<String, String> heroSquareImagesUrl;
