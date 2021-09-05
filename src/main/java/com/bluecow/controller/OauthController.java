@@ -61,24 +61,40 @@ public class OauthController {
         public String getUsername() {
             return username;
         }
-
+        public String getName() {
+            return name;
+        }
         public String getPassword() {
             return password;
         }
 
         private String username;
         private String password;
+        private String name;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody LoginForm loginForm) {
+        String username=loginForm.getUsername();
+        String password=loginForm.getPassword();
+        String name=loginForm.getName();
+        Player player;
+        if(playerService.existsEmail(username))
+            return new ResponseEntity<>("Already exists", HttpStatus.FORBIDDEN);
+        else
+            player = savePlayer(username,name,password);
+        return new ResponseEntity<>("Created succesfully", HttpStatus.OK);
     }
 
     @PostMapping("/user")
-    public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws IOException {
+    public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws Exception {
         String username=loginForm.getUsername();
         String password=loginForm.getPassword();
         Player player;
         if(playerService.existsEmail(username))
             player = playerService.getByEmail(username).get();
         else
-            player = savePlayer(username,username,password);
+            throw new Exception("Player doesnt exists");
         TokenDto tokenRes = login(player,password);
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
