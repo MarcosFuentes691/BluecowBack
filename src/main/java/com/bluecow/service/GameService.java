@@ -2,6 +2,7 @@ package com.bluecow.service;
 
 import com.bluecow.entity.Game;
 
+import java.util.Calendar;
 import java.util.List;
 
 public interface GameService {
@@ -10,4 +11,5 @@ public interface GameService {
     Game detailedGameById(Long id,String player) throws Exception;
     List<Game> viewGames(String playerEmail,int page,int amount);
     List<Game> searchGames(String playerEmail, String hero, String from, String to,int page,int amount, String timeZone) throws Exception;
+    void randomGames(Calendar start, Calendar end, int startMmr);
 }

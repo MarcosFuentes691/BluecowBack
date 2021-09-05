@@ -1,5 +1,6 @@
 package com.bluecow.service;
 
+import com.bluecow.consts.ConstHeroes;
 import com.bluecow.utility.HeroUtility;
 import com.bluecow.entity.Game;
 import com.bluecow.repository.GameRepository;
@@ -131,4 +132,63 @@ public class GameServiceImpl implements GameService{
         }
         return games;
     }
+
+    @Override
+    public void randomGames(Calendar start, Calendar end,int lastMmr) {
+
+        while(start.before(end)){
+            int random_int = (int)Math.floor(Math.random()*(15-5+1)+5);
+            float randomFloat = (float) random_int;
+            for (int i = 0; i < random_int; i++) {
+                Game game=new Game();
+                int points=0;
+                game.setPlayer("dummy@email.com");
+                int h=ConstHeroes.heroList.size();
+                h=(int)Math.floor(Math.random()*(h-3+1)+1);
+                game.setHero(ConstHeroes.heroList.get(h));
+                game.setPlace((int)Math.floor(Math.random()*(8-1+1)+1));
+                switch(game.getPlace()) {
+                    case 1:
+                        points=101;
+                        break;
+                    case 2:
+                        points=71;
+                        break;
+                    case 3:
+                        points=31;
+                        break;
+                    case 4:
+                        points=11;
+                        break;
+                    case 5:
+                        points=-10;
+                        break;
+                    case 6:
+                        points=-30;
+                        break;
+                    case 7:
+                        points=-70;
+                        break;
+                    case 8:
+                        points=-100;
+                        break;
+                }
+                points+=(int)Math.floor(Math.random()*(15-1+1)+5);
+                game.setMmr(lastMmr+points);
+                game.setDifference(points);
+                float hour = 24/randomFloat*i;
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(start.getTime());
+                calendar.set(Calendar.HOUR,(int)hour);
+                calendar.set(Calendar.MINUTE,(int)Math.floor(Math.random()*(59-2+1)+0));
+                game.setTimestamp(calendar);
+                game.setHeroUrl("none");
+                game.setTimestampString("none");
+                gameRepository.save(game);
+            }
+            log.info(start.getTime().toString());
+            start.add(Calendar.DATE,1);
+        }
+    }
+
 }
