@@ -56,6 +56,7 @@ public class ConstHeroes {
             "Rat King",
             "Reno",
             "Saurfang",
+            "Shudderwock",
             "Silas",
             "Sindragosa",
             "Tess",
