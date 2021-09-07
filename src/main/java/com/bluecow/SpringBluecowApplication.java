@@ -25,8 +25,6 @@ public class SpringBluecowApplication {
 	@Bean
 	CommandLineRunner run(GameService gameService) {
 		return args -> {
-			log.info(System.getenv("DATABASE_URL"));
-			log.info(System.getenv("SECRET"));
 			//Calendar calFrom = Calendar.getInstance();
 			//calFrom.set(2021, Calendar.SEPTEMBER,3,1,1,1);
 			//Calendar calTo = Calendar.getInstance();
