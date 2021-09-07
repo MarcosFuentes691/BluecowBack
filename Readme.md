@@ -1,0 +1,1 @@
+Backend of Bluecow 2.0, a more complete readme on this project will be coming very soon
