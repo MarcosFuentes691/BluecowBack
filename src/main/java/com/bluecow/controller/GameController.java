@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -74,7 +76,12 @@ public class GameController {
                                                 @RequestParam int page,
                                                 @RequestParam int amount){
         authReq=bearerCleaner.cleanBearer(authReq);
-        return new ResponseEntity<>(gameService.viewGames(authReq,page,amount), HttpStatus.OK);
+        List<Game> lista=gameService.viewGames(authReq,page,amount);
+        for (int i = 0; i < lista.size(); i++) {
+            if(lista.get(i).getTimestamp().before(Timestamp.from(Instant.now())))
+                lista.remove(i);
+        }
+        return new ResponseEntity<>(lista, HttpStatus.OK);
     }
 
     @ApiOperation(value = "View a page of a specific search of the games of the user")
