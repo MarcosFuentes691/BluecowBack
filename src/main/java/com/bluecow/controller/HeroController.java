@@ -6,6 +6,7 @@ import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.HeroService;
 import com.bluecow.utility.BearerCleaner;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class HeroController {
         this.heroService = heroService;
     }
 
+    @ApiOperation(value = "View all heroes of the user")
     @GetMapping("/all")
     public ResponseEntity<?> viewHeroes(@RequestHeader("Authorization") String authReq,
                                         @RequestParam(required=false) String from,
@@ -46,6 +48,7 @@ public class HeroController {
         return ResponseEntity.status(200).body(heroes);
     }
 
+    @ApiOperation(value = "Search of heroes of the user")
     @GetMapping("/search")
     public ResponseEntity<?> searchHero(@RequestHeader("Authorization") String authReq,
                                          @RequestParam(required=false) String hero,

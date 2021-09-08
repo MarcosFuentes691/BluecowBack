@@ -5,6 +5,7 @@ import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.GameService;
 import com.bluecow.utility.BearerCleaner;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
+    @ApiOperation(value = "Add a new game")
     @PostMapping("/add")
     public ResponseEntity<?> addGame(@RequestHeader("Authorization") String authReq,
                                         @RequestBody Game game){
@@ -46,11 +48,13 @@ public class GameController {
         return new ResponseEntity<>(game, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Edit a game")
     @PutMapping("/edit")
     public ResponseEntity<List<Game>> editGame(@RequestHeader("Authorization") String authReq) {
         return null;
     }
 
+    @ApiOperation(value = "Delete a game")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteGame(@RequestHeader("Authorization") String authReq,
                                              @RequestParam("id") Long id) {
@@ -64,20 +68,7 @@ public class GameController {
         return new ResponseEntity<>("Game" +id.toString()+ " deleted succesfully", HttpStatus.OK);
     }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<?> detailedGame(@RequestHeader("Authorization") String authReq,
-                                          @PathVariable("id") Long id) {
-        authReq=bearerCleaner.cleanBearer(authReq);
-        Game game;
-        try {
-            game=gameService.detailedGameById(id,authReq);
-        }catch (Exception e){
-            log.warn(e.getMessage());
-            return  new ResponseEntity<>("Id " +id+ " not found", HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(game, HttpStatus.OK);
-    }
-
+    @ApiOperation(value = "View a page of all the games of the user")
     @GetMapping("/view")
     public ResponseEntity<List<Game>> viewGames(@RequestHeader("Authorization") String authReq,
                                                 @RequestParam int page,
@@ -86,6 +77,7 @@ public class GameController {
         return new ResponseEntity<>(gameService.viewGames(authReq,page,amount), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "View a page of a specific search of the games of the user")
     @GetMapping("/search")
     public ResponseEntity<?> searchGames(@RequestHeader("Authorization") String authReq,
                                          @RequestParam(required=false) String hero,

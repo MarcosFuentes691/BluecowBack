@@ -6,6 +6,7 @@ import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.HeroService;
 import com.bluecow.service.PlayerService;
 import com.bluecow.utility.BearerCleaner;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
+    @ApiOperation(value = "View an array of stats of the user")
     @GetMapping("/stats")
     public ResponseEntity<?> viewStats(@RequestHeader("Authorization") String authReq){
         authReq=bearerCleaner.cleanBearer(authReq);
@@ -41,6 +43,7 @@ public class PlayerController {
         }
     }
 
+    @ApiOperation(value = "View stats of the user on specifics date")
     @GetMapping("/date")
     public ResponseEntity<?> viewDate(@RequestHeader("Authorization") String authReq,
                                       @RequestParam(required=false) String from,

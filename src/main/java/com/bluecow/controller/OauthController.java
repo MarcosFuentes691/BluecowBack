@@ -14,6 +14,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
 import java.util.*;
@@ -61,23 +63,34 @@ public class OauthController {
         public String getUsername() {
             return username;
         }
-        public String getName() {
-            return name;
+        public String getPassword() {
+            return password;
+        }
+        private String username;
+        private String password;
+    }
+
+    private static class RegisterForm {
+        public String getUsername() {
+            return username;
         }
         public String getPassword() {
             return password;
         }
-
+        public String getName() {
+            return name;
+        }
+        private String name;
         private String username;
         private String password;
-        private String name;
     }
 
+    @ApiOperation(value = "Register a new user")
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody LoginForm loginForm) {
-        String username=loginForm.getUsername();
-        String password=loginForm.getPassword();
-        String name=loginForm.getName();
+    public ResponseEntity<String> register(@RequestBody RegisterForm registerForm) {
+        String username=registerForm.getUsername();
+        String password=registerForm.getPassword();
+        String name=registerForm.getName();
         Player player;
         if(playerService.existsEmail(username))
             return new ResponseEntity<>("Already exists", HttpStatus.FORBIDDEN);
@@ -86,6 +99,7 @@ public class OauthController {
         return new ResponseEntity<>("Created succesfully", HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Login with a user")
     @PostMapping("/user")
     public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws Exception {
         String username=loginForm.getUsername();
@@ -99,6 +113,7 @@ public class OauthController {
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Login with a google account")
     @PostMapping("/google")
     public ResponseEntity<TokenDto> google(@RequestBody TokenDto tokenDto) throws IOException {
         final NetHttpTransport transport = new NetHttpTransport();
@@ -117,6 +132,7 @@ public class OauthController {
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @GetMapping("/check")
     public ResponseEntity<UserResponse> user (@RequestHeader("Authorization") String authReq) {
         int i=0;
