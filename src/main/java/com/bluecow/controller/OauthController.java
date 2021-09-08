@@ -99,7 +99,7 @@ public class OauthController {
         return new ResponseEntity<>("Created succesfully", HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Login with a user")
+    @ApiOperation(value = "Login with a user (not Google user)")
     @PostMapping("/user")
     public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws Exception {
         String username=loginForm.getUsername();
@@ -113,6 +113,7 @@ public class OauthController {
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
+    @ApiIgnore
     @ApiOperation(value = "Login with a google account")
     @PostMapping("/google")
     public ResponseEntity<TokenDto> google(@RequestBody TokenDto tokenDto) throws IOException {

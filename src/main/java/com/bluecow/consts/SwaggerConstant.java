@@ -8,7 +8,7 @@ public class SwaggerConstant {
     public static final String SECURE_PATH = "/*/.*";
     public static final String API_TITLE = "Bluecow API";
     public static final String API_DESCRIPTION =
-            "In order to execute requests you first need to register and login (the easiest way to do this is to login via the frontend) to get a token<br>" +
+            "In order to execute requests you first need to register and login to get a token " +
             ",which you need to execute requests, to use it you need the enter the following 'Bearer *Your token*' in the authorization field";
     public static final String API_VERSION = "1.0";
     public static final String LICENSE = "";
