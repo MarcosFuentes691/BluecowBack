@@ -113,7 +113,6 @@ public class OauthController {
         return new ResponseEntity(tokenRes, HttpStatus.OK);
     }
 
-    @ApiIgnore
     @ApiOperation(value = "Login with a google account")
     @PostMapping("/google")
     public ResponseEntity<TokenDto> google(@RequestBody TokenDto tokenDto) throws IOException {
