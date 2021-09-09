@@ -44,6 +44,7 @@ public class ConstHeroes {
             "Millificent",
             "Mukla",
             "Mutanus",
+            "Nguyen",
             "Nozdormu",
             "N'Zoth",
             "Omu",
@@ -70,7 +71,9 @@ public class ConstHeroes {
             "Ysera",
             "Zephrys",
             "Nguyen",
-            "Cariel"
+            "Cariel",
+            "Wagtoggle",
+            "DC"
             ));
 
     public static Map<String, String> heroSquareImagesUrl;
