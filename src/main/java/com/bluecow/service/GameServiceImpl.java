@@ -50,6 +50,14 @@ public class GameServiceImpl implements GameService{
             e.printStackTrace();
             game.setDifference(0);
         }
+        try{
+            Game nextGame=gameRepository.getFirstByTimestampIsGreaterThanAndPlayerOrderByTimestampAsc(game.getTimestamp(), game.getPlayer());
+            int diff=nextGame.getMmr()-game.getMmr();
+            nextGame.setDifference(diff);
+            gameRepository.save(nextGame);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
         return gameRepository.save(game);
     }
 
