@@ -5,3 +5,4 @@ Deployed online at https://bluecowback.herokuapp.com/ (It's not using any paid d
 
 Documentation available at https://bluecowback.herokuapp.com/swagger-ui/
 
+More information about what's next in the app can be found at https://www.notion.so/568121e9b72a447abf2962410d7919f4?v=50a413b2340b45548747021acbd30c57
