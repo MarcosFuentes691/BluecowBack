@@ -152,13 +152,13 @@ public class GameServiceImpl implements GameService{
                         points=101;
                         break;
                     case 2:
-                        points=71;
+                        points=70;
                         break;
                     case 3:
-                        points=31;
+                        points=30;
                         break;
                     case 4:
-                        points=11;
+                        points=10;
                         break;
                     case 5:
                         points=-10;
@@ -176,6 +176,7 @@ public class GameServiceImpl implements GameService{
                 points+=(int)Math.floor(Math.random()*(15-1+1)+5);
                 game.setMmr(lastMmr+points);
                 game.setDifference(points);
+                lastMmr=game.getMmr();
                 float hour = 24/randomFloat*i;
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(start.getTime());
