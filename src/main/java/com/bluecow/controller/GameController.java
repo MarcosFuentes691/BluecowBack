@@ -1,10 +1,12 @@
 package com.bluecow.controller;
 
+import com.bluecow.consts.ConstHeroes;
 import com.bluecow.entity.Game;
 import com.bluecow.repository.GameRepository;
 import com.bluecow.security.jwt.JwtProvider;
 import com.bluecow.service.GameService;
 import com.bluecow.utility.BearerCleaner;
+import com.google.common.collect.HashBiMap;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/game")
@@ -41,6 +45,27 @@ public class GameController {
         game.setPlayer(authReq);
         game.setHeroUrl("none");
         game.setTimestampString("none");
+        try {
+            game=gameService.saveGame(game);
+        }catch (Exception e){
+            log.warn(e.getMessage());
+            return new ResponseEntity<>("Game not valid", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(game, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Add a new game from the app")
+    @PostMapping("/addApp")
+    public ResponseEntity<?> addGameApp(@RequestHeader("Authorization") String authReq,
+                                        @RequestBody LinkedHashMap<String,String> obj){
+        authReq=bearerCleaner.cleanBearer(authReq);
+        Game game = new Game();
+        game.setPlayer(obj.get("player"));
+        game.setTimestampString("now");
+        game.setMmr(Integer.parseInt(obj.get("mmr")));
+        game.setPlace(Integer.parseInt(obj.get("place")));
+        Map<String, String> inverted = HashBiMap.create(ConstHeroes.heroesInGame).inverse();
+        game.setHero(inverted.get(obj.get("hero")));
         try {
             game=gameService.saveGame(game);
         }catch (Exception e){

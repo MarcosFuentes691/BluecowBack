@@ -11,7 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.List;
 
@@ -35,8 +37,9 @@ public class GameServiceImpl implements GameService{
         Calendar cal = Calendar.getInstance();
         if(game.getTimestampString().equals("none"))
             cal.setTime(game.getTimestamp().getTime());
-        else
-            cal.setTime(sdf.parse(game.getTimestampString()));
+        else if(game.getTimestampString().equals("now"))
+            cal.setTime(Timestamp.from(Instant.now()));
+        else cal.setTime(sdf.parse(game.getTimestampString()));
         game.setTimestamp(cal);
         if(game.getTimestamp().after(Calendar.getInstance().getTime()))
             throw new Exception("Timestamp from the future");

@@ -101,7 +101,7 @@ public class OauthController {
 
     @ApiOperation(value = "Login with a user (not Google user)")
     @PostMapping("/user")
-    public ResponseEntity<TokenDto> user(@RequestBody LoginForm loginForm) throws Exception {
+    public ResponseEntity<?> user(@RequestBody LoginForm loginForm) throws Exception {
         String username=loginForm.getUsername();
         String password=loginForm.getPassword();
         Player player;
@@ -110,7 +110,7 @@ public class OauthController {
         else
             throw new Exception("Player doesnt exists");
         TokenDto tokenRes = login(player,password);
-        return new ResponseEntity(tokenRes, HttpStatus.OK);
+        return new ResponseEntity<>(tokenRes, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Login with a google account")
@@ -129,7 +129,7 @@ public class OauthController {
         else
             player = savePlayer(payload.getEmail(),(String) payload.get("name"),secretPsw);
         TokenDto tokenRes = login(player,secretPsw);
-        return new ResponseEntity(tokenRes, HttpStatus.OK);
+        return new ResponseEntity<>(tokenRes, HttpStatus.OK);
     }
 
     @ApiIgnore
