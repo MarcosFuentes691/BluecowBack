@@ -113,6 +113,22 @@ public class OauthController {
         return new ResponseEntity<>(tokenRes, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Add password to a google account")
+    @PostMapping("/addPassword")
+    public ResponseEntity<?> addPassword(@RequestBody LoginForm loginForm) throws Exception {
+        String username=loginForm.getUsername();
+        String password=loginForm.getPassword();
+        Player player;
+        if(playerService.existsEmail(username))
+            player = playerService.getByEmail(username).get();
+        else
+            throw new Exception("Player doesnt exists");
+        password=passwordEncoder.encode(password);
+        player.setPassword(password);
+        playerService.save(player);
+        return new ResponseEntity<>("Added succesfully", HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Login with a google account")
     @PostMapping("/google")
     public ResponseEntity<TokenDto> google(@RequestBody TokenDto tokenDto) throws IOException {
