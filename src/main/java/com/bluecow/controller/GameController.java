@@ -64,8 +64,12 @@ public class GameController {
         game.setTimestampString("now");
         game.setMmr(Integer.parseInt(obj.get("mmr")));
         game.setPlace(Integer.parseInt(obj.get("place")));
+        String hero = obj.get("hero");
+        if(hero.contains("_SKIN_")){
+            hero=hero.substring(0, hero.length() - 7);
+        }
         Map<String, String> inverted = HashBiMap.create(ConstHeroes.heroesInGame).inverse();
-        game.setHero(inverted.get(obj.get("hero")));
+        game.setHero(inverted.get(hero));
         try {
             game=gameService.saveGame(game);
         }catch (Exception e){
