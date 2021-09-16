@@ -21,6 +21,7 @@ public class ConstHeroes {
             "Edwin",
             "Elise",
             "Eudora",
+            "Finley",
             "Flurgl",
             "Galakrond",
             "Galewing",
@@ -96,6 +97,7 @@ public class ConstHeroes {
         heroesInGame.put("Edwin", "TB_BaconShop_HERO_01");
         heroesInGame.put("Elise", "TB_BaconShop_HERO_42");
         heroesInGame.put("Eudora", "TB_BaconShop_HERO_64");
+        heroesInGame.put("Finley", "TB_BaconShop_HERO_40");
         heroesInGame.put("Flurgl", "TB_BaconShop_HERO_55");
         heroesInGame.put("Galakrond", "TB_BaconShop_HERO_02");
         heroesInGame.put("Galewing", "BG20_HERO_283");
