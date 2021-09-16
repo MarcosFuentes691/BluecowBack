@@ -148,19 +148,22 @@ public class OauthController {
         return new ResponseEntity<>(tokenRes, HttpStatus.OK);
     }
 
-    @ApiIgnore
     @GetMapping("/check")
-    public ResponseEntity<UserResponse> user (@RequestHeader("Authorization") String authReq) {
+    public ResponseEntity<?> user (@RequestHeader("Authorization") String authReq) {
         int i=0;
         BearerCleaner bearerCleaner = new BearerCleaner();
         authReq=bearerCleaner.cleanBearer(authReq);
-        Player player=playerService.getByEmail(authReq).get();
-        UserResponse userResponse;
-        if(player.getEmail().equals(player.getName()))
-            userResponse = new UserResponse(authReq);
-        else
-            userResponse = new UserResponse();
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+        try{
+            Player player=playerService.getByEmail(authReq).get();
+            if (player.getEmail().equals(authReq))
+                return new ResponseEntity<>("true", HttpStatus.OK);
+            else
+                return new ResponseEntity<>("false", HttpStatus.FORBIDDEN);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>("false", HttpStatus.FORBIDDEN);
+        }
     }
 
     private TokenDto login(Player player,String password){
