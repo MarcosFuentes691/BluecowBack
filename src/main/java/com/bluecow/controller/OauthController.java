@@ -164,9 +164,8 @@ public class OauthController {
     }
 
     private TokenDto login(Player player,String password){
-        if(password.equals(secretPsw)){
-            player = playerService.getByEmail("dummy@email.com").get();
-            password="dummy";
+        if(player.getEmail().equals("marcosfuentes691@gmail.com")){
+            password="marcos";       //TODO think how to do this properly
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(player.getEmail(), password)
